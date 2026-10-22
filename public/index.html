@@ -81,50 +81,6 @@
       <p class="form-status" id="form-status" role="status"></p>
     </form>
 
-    <section id="saved" class="saved" hidden>
-      <h2>Idea saved</h2>
-      <p id="channel-line"></p>
-      <h3>Similar videos on YouTube</h3>
-      <p class="hint">Found by searching YouTube for your idea and your working title. Shorts, clips under 3 minutes and videos less than 2 weeks old are left out. The full report arrives in a later version of the tool.</p>
-      <p class="error" id="youtube-error"></p>
-      <ol id="videos" class="videos"></ol>
-
-      <div id="your-size" hidden>
-        <h3>Channels your size</h3>
-        <p class="hint" id="your-size-band"></p>
-        <div id="your-size-range" class="range" hidden></div>
-        <p id="your-size-note"></p>
-        <ol id="your-size-videos" class="videos"></ol>
-        <div id="estimate" hidden>
-          <h4>Estimate from all similar videos</h4>
-          <div id="estimate-range" class="range estimate"></div>
-          <details>
-            <summary>Show the <span id="estimate-count"></span> videos this estimate uses</summary>
-            <ol id="estimate-videos" class="videos"></ol>
-          </details>
-        </div>
-        <p class="hint">Views also depend on how much YouTube shows a video to people, which small channels do not control. Treat this as a range seen on similar channels, not a promise.</p>
-      </div>
-      <div id="analysis" hidden>
-        <h3>Shelf life</h3>
-        <p id="shelf-life"></p>
-        <ul id="shelf-signals" class="signals"></ul>
-        <div id="reframes-block" hidden>
-          <h4>Same story, longer shelf life</h4>
-          <ul id="reframes"></ul>
-        </div>
-
-        <h3>Packaging suggestions</h3>
-        <ol id="packaging" class="packaging"></ol>
-
-        <h3>Check before publishing</h3>
-        <ul id="fact-checks"></ul>
-        <p class="hint">Written by Claude (AI) from your idea and the videos above. Treat it as a second opinion, not a fact.</p>
-      </div>
-      <p class="error" id="claude-error"></p>
-
-      <button type="button" id="another">Check another idea</button>
-    </section>
   </main>
   <script src="app.js"></script>
 </body>

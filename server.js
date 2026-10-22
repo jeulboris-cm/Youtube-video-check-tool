@@ -1,12 +1,7 @@
 const path = require("path");
 const express = require("express");
 const ideas = require("./lib/ideas");
-const youtube = require("./lib/youtube");
-const compare = require("./lib/compare");
-const claude = require("./lib/claude");
-
-// How many of the most relevant videos the "Similar videos" list shows.
-const SHOWN_SIMILAR = 12;
+const { buildReport } = require("./lib/report");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,67 +14,31 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-// Saves one idea from the input form, then looks up similar videos on
-// YouTube. The idea is saved even if the YouTube lookup fails.
+// Saves one idea from the input form, then builds its report. The idea is
+// saved first, so it is kept even if building the report fails.
 app.post("/api/ideas", async (req, res) => {
   const { errors, values } = ideas.validate(req.body || {});
   if (Object.keys(errors).length > 0) {
     return res.status(400).json({ errors });
   }
   const record = ideas.save(values);
-  const result = {
-    id: record.id,
-    createdAt: record.createdAt,
-    channel: null,
-    similarVideos: null,
-    yourSize: null,
-    analysis: null,
-  };
-
   try {
-    result.channel = await youtube.lookupChannel(record.channelUrl);
-    const subscribers = result.channel?.subscribers;
-    // The size filter uses every relevant video found, not only the ones
-    // shown, so there is more chance of enough comparable videos.
-    let allSimilar = await youtube.findSimilarVideos(record);
-    result.yourSize = compare.channelsYourSize(allSimilar, subscribers, result.channel?.id);
-    // Too few from channels this size: search one page deeper (about 200
-    // more units) before falling back to the per-subscriber estimate.
-    if (result.yourSize.status === "thin") {
-      allSimilar = await youtube.findSimilarVideos(record, { pages: 2 });
-      result.yourSize = compare.channelsYourSize(allSimilar, subscribers, result.channel?.id);
-      result.yourSize.searchedDeeper = true;
-    }
-    result.similarVideos = allSimilar.slice(0, SHOWN_SIMILAR);
-    // Keep a snapshot of what was shown that day, as the spec asks.
-    ideas.update(record.id, {
-      channelSubscribers: result.channel?.subscribers ?? null,
-      similarVideos: result.similarVideos,
-      yourSize: result.yourSize,
-      similarVideosCheckedAt: new Date().toISOString(),
-    });
+    // Keep a snapshot of the report as it was that day, as the spec asks.
+    const report = await buildReport(record);
+    ideas.update(record.id, { channelSubscribers: report.channel?.subscribers ?? null, report });
   } catch (error) {
-    if (!(error instanceof youtube.YouTubeError)) console.error(error);
-    result.youtubeError =
-      error instanceof youtube.YouTubeError ? error.message : "Could not reach YouTube. Try again in a moment.";
+    console.error(error);
+    return res.status(500).json({ error: "Your idea was saved, but the report could not be built. Try again." });
   }
+  res.status(201).json({ id: record.id });
+});
 
-  // Shelf life, reframes, packaging and fact checks from Claude. Runs even if
-  // YouTube failed: the wording and the tester's answers still say something.
-  try {
-    result.analysis = await claude.analyzeIdea(
-      { ...record, channelSubscribers: result.channel?.subscribers ?? null },
-      result.similarVideos || [],
-      result.yourSize,
-    );
-    ideas.update(record.id, { analysis: result.analysis, analysisAt: new Date().toISOString() });
-  } catch (error) {
-    if (!(error instanceof claude.ClaudeError)) console.error(error);
-    result.claudeError =
-      error instanceof claude.ClaudeError ? error.message : "Could not reach Claude. Try again in a moment.";
-  }
-
-  res.status(201).json(result);
+// Returns a saved idea and its report, for the report page. Ids are random
+// and unguessable, so only someone with the link can see it.
+app.get("/api/ideas/:id", (req, res) => {
+  const record = ideas.find(req.params.id);
+  if (!record) return res.status(404).json({ error: "Report not found." });
+  res.json(record);
 });
 
 // Listen on all interfaces so a phone on the same Wi-Fi can open the page.

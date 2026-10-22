@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Idea Check report</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="container report">
+    <p><a href="/">← Check another idea</a></p>
+    <h1>Idea Check report</h1>
+    <p id="loading" role="status">Loading your report…</p>
+    <p class="error" id="load-error"></p>
+
+    <div id="report" hidden>
+      <header class="idea-summary">
+        <h2 id="idea-title"></h2>
+        <p id="idea-text"></p>
+        <p class="meta" id="idea-meta"></p>
+      </header>
+      <p class="error" id="youtube-error"></p>
+      <p class="error" id="claude-error"></p>
+
+      <section>
+        <h2><span class="num">1</span> Similar videos</h2>
+        <p class="hint">Found by searching YouTube for your idea and your working title, most relevant first. Shorts, clips under 3 minutes and videos less than 2 weeks old are left out.</p>
+        <ol id="similar" class="videos"></ol>
+      </section>
+
+      <section>
+        <h2><span class="num">2</span> Channels your size</h2>
+        <p class="hint" id="size-band"></p>
+        <div id="size-range" class="range" hidden></div>
+        <p id="size-note"></p>
+        <ol id="size-videos" class="videos"></ol>
+        <div id="estimate" hidden>
+          <h3>Estimate from similar videos</h3>
+          <div id="estimate-range" class="range estimate"></div>
+          <details>
+            <summary>Show the <span id="estimate-count"></span> videos this estimate uses</summary>
+            <ol id="estimate-videos" class="videos"></ol>
+          </details>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="num">3</span> Who owns the subject</h2>
+        <p id="ownership"></p>
+        <p id="breakthrough-note"></p>
+        <ol id="breakthroughs" class="videos"></ol>
+      </section>
+
+      <section>
+        <h2><span class="num">4</span> Shelf life</h2>
+        <p id="shelf-life"></p>
+        <ul id="shelf-signals" class="signals"></ul>
+        <div id="reframes-block" hidden>
+          <h3>Same story, longer shelf life</h3>
+          <ul id="reframes"></ul>
+        </div>
+        <p class="hint" id="shelf-source"></p>
+      </section>
+
+      <section>
+        <h2><span class="num">5</span> Cost versus range</h2>
+        <div id="cost"></div>
+      </section>
+
+      <section>
+        <h2><span class="num">6</span> Packaging suggestions</h2>
+        <div id="packaging-block" hidden>
+          <ol id="packaging" class="packaging"></ol>
+          <h3>Check before publishing</h3>
+          <ul id="fact-checks"></ul>
+          <p class="hint">Written by Claude (AI) from your idea and the videos above. Treat it as a second opinion, not a fact.</p>
+        </div>
+        <p id="packaging-missing" hidden>
+          Packaging suggestions and fact-check flags need Claude (AI), which is not connected yet.
+          Until then, compare the titles in section 1 that got the most views from channels near your size.
+        </p>
+      </section>
+
+      <section class="limits">
+        <h2>Known limits</h2>
+        <p>
+          These are ranges seen on similar videos, never a promise of views. Views also depend on how much
+          YouTube shows a video to people, which small channels do not control: in our own tests, videos with
+          similar click rates got anywhere from 281 to 53,600 impressions.
+        </p>
+      </section>
+    </div>
+  </main>
+  <script src="report.js"></script>
+</body>
+</html>

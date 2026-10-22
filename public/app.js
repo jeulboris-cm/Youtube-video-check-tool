@@ -1,21 +1,6 @@
 const form = document.getElementById("idea-form");
 const submitButton = document.getElementById("submit");
 const formStatus = document.getElementById("form-status");
-const saved = document.getElementById("saved");
-const channelLine = document.getElementById("channel-line");
-const youtubeError = document.getElementById("youtube-error");
-const videoList = document.getElementById("videos");
-const yourSize = document.getElementById("your-size");
-const yourSizeBand = document.getElementById("your-size-band");
-const yourSizeRange = document.getElementById("your-size-range");
-const yourSizeNote = document.getElementById("your-size-note");
-const yourSizeVideos = document.getElementById("your-size-videos");
-const analysis = document.getElementById("analysis");
-const claudeError = document.getElementById("claude-error");
-const estimate = document.getElementById("estimate");
-const estimateRange = document.getElementById("estimate-range");
-const estimateCount = document.getElementById("estimate-count");
-const estimateVideos = document.getElementById("estimate-videos");
 
 const FIELDS = ["idea", "workingTitle", "channelUrl", "lengthMinutes", "costUsd", "productionDays", "newsTied"];
 
@@ -33,185 +18,12 @@ function showErrors(errors) {
   }
 }
 
-const numberFormat = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
-
-function formatCount(n, noun) {
-  if (n === null || n === undefined) return `${noun} hidden`;
-  return `${numberFormat.format(n)} ${noun}`;
-}
-
-function formatAge(isoDate) {
-  const days = Math.floor((Date.now() - Date.parse(isoDate)) / 86400000);
-  const plural = (n, unit) => `${n} ${unit}${n === 1 ? "" : "s"} ago`;
-  if (days < 1) return "today";
-  if (days < 30) return plural(days, "day");
-  if (days < 365) return plural(Math.floor(days / 30), "month");
-  return plural(Math.floor(days / 365), "year");
-}
-
-function showResults(result) {
-  if (result.channel) {
-    channelLine.textContent = `Your channel: ${result.channel.title}, ${formatCount(result.channel.subscribers, "subscribers")}.`;
-  } else if (result.youtubeError) {
-    channelLine.textContent = "";
-  } else {
-    channelLine.textContent = "We could not read your channel's subscriber count from that link. Links like youtube.com/@name work best.";
-  }
-
-  youtubeError.textContent = result.youtubeError || "";
-  videoList.replaceChildren();
-  const videos = result.similarVideos || [];
-  if (!result.youtubeError && videos.length === 0) {
-    youtubeError.textContent = "No similar videos found on YouTube for this idea.";
-  }
-  renderVideos(videoList, videos);
-  showYourSize(result.yourSize);
-  showAnalysis(result.analysis);
-  claudeError.textContent = result.claudeError || "";
-}
-
-const SHELF_LIFE = { short: "Short (weeks)", medium: "Medium (months)", long: "Long (years)" };
-const SIGNAL_NAMES = {
-  wording: "Wording",
-  older_competitors: "Older similar videos",
-  tester_answer: "Your answer about news",
-  search_interest: "Search interest",
-};
-const POINTS_TO = { short: "points to short", long: "points to long", unclear: "unclear" };
-
-// Fills a list with one item per entry; build(entry) returns the item's nodes.
-function fillList(list, entries, build) {
-  list.replaceChildren(
-    ...entries.map((entry) => {
-      const item = document.createElement("li");
-      item.append(...build(entry));
-      return item;
-    }),
-  );
-}
-
-function bold(text) {
-  const b = document.createElement("strong");
-  b.textContent = text;
-  return b;
-}
-
-function showAnalysis(data) {
-  analysis.hidden = !data;
-  if (!data) return;
-
-  const tag = document.createElement("span");
-  tag.className = "label-tag";
-  tag.textContent = SHELF_LIFE[data.shelfLife.label];
-  document.getElementById("shelf-life").replaceChildren(tag, ` ${data.shelfLife.reason}`);
-  fillList(document.getElementById("shelf-signals"), data.shelfLife.signals, (s) => [
-    bold(`${SIGNAL_NAMES[s.signal] || s.signal} (${POINTS_TO[s.pointsTo]}): `),
-    s.detail,
-  ]);
-
-  document.getElementById("reframes-block").hidden = data.reframes.length === 0;
-  fillList(document.getElementById("reframes"), data.reframes, (r) => [r]);
-
-  fillList(document.getElementById("packaging"), data.packaging, (p) => [
-    bold(p.angle),
-    document.createElement("br"),
-    `Example title: "${p.exampleTitle}"`,
-    document.createElement("br"),
-    p.reason,
-  ]);
-
-  const checks = data.factChecks.length ? data.factChecks : [{ claim: "No specific claims to check were found.", why: "" }];
-  fillList(document.getElementById("fact-checks"), checks, (f) => [bold(f.claim), f.why ? ` ${f.why}` : ""]);
-}
-
-function renderVideos(list, videos) {
-  list.replaceChildren();
-  for (const video of videos) {
-    const item = document.createElement("li");
-    const link = document.createElement("a");
-    link.href = video.url;
-    link.target = "_blank";
-    link.rel = "noopener";
-    link.textContent = video.title;
-    const meta = document.createElement("span");
-    meta.className = "meta";
-    meta.textContent = [
-      formatCount(video.views, "views"),
-      formatAge(video.publishedAt),
-      `${video.channelTitle} (${formatCount(video.channelSubscribers, "subscribers")})`,
-    ].join(" · ");
-    item.append(link, meta);
-    list.append(item);
-  }
-}
-
-function showEstimate(data) {
-  const r = data.range;
-  const per = data.viewsPerSubscriber;
-  const ratio = new Intl.NumberFormat("en", { maximumFractionDigits: 2 });
-  estimateRange.replaceChildren();
-  const main = document.createElement("p");
-  main.append("If your video does like most similar videos, relative to channel size: ");
-  const strong = document.createElement("strong");
-  strong.textContent = `${numberFormat.format(r.low)} to ${numberFormat.format(r.high)} views`;
-  main.append(strong, ` (middle: ${numberFormat.format(r.middle)}).`);
-  const how = document.createElement("p");
-  how.className = "meta";
-  how.textContent =
-    `This is an estimate, not direct evidence from channels your size. Most of the ${data.videos.length} similar videos ` +
-    `from channels with ${numberFormat.format(data.band.min)} to ${numberFormat.format(data.band.max)} subscribers ` +
-    `got ${ratio.format(per.low)} to ${ratio.format(per.high)} views per subscriber of their channel; ` +
-    "we applied that to your subscriber count. Bigger and smaller channels can behave differently.";
-  estimateRange.append(main, how);
-  estimateCount.textContent = data.videos.length;
-  renderVideos(estimateVideos, data.videos);
-  estimate.hidden = false;
-}
-
-function showYourSize(data) {
-  yourSize.hidden = !data;
-  if (!data) return;
-  yourSizeRange.hidden = true;
-  estimate.hidden = true;
-  yourSizeBand.textContent = data.band
-    ? `Similar videos from channels with ${numberFormat.format(data.band.min)} to ${numberFormat.format(data.band.max)} subscribers (half to double your size).`
-    : "";
-  renderVideos(yourSizeVideos, data.videos);
-
-  if (data.status === "unknown_size") {
-    yourSizeNote.textContent =
-      "We need your subscriber count to compare with channels your size. Use a channel link like youtube.com/@name, and make sure your subscriber count is public.";
-  } else if (data.status === "thin") {
-    const found = data.videos.length;
-    yourSizeNote.textContent =
-      `Not enough data: we found ${found === 0 ? "no" : `only ${found}`} similar video${found === 1 ? "" : "s"} from channels your size, ` +
-      `and need at least ${data.minimum} to give a range from channels your size` +
-      (data.searchedDeeper ? ", even after searching deeper." : ".") +
-      " Naming the specific people, companies or places in your idea can help.";
-    if (data.estimate) showEstimate(data.estimate);
-  } else {
-    const r = data.range;
-    yourSizeRange.replaceChildren();
-    const main = document.createElement("p");
-    main.append("Most of these videos got ");
-    const strong = document.createElement("strong");
-    strong.textContent = `${numberFormat.format(r.low)} to ${numberFormat.format(r.high)} views`;
-    main.append(strong, ` (middle: ${numberFormat.format(r.middle)}).`);
-    const extremes = document.createElement("p");
-    extremes.className = "meta";
-    extremes.textContent = `Lowest: ${numberFormat.format(r.lowest)} · Highest: ${numberFormat.format(r.highest)} · Based on the ${data.videos.length} videos below.`;
-    yourSizeRange.append(main, extremes);
-    yourSizeRange.hidden = false;
-    yourSizeNote.textContent = "";
-  }
-}
-
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const data = Object.fromEntries(new FormData(form));
 
   submitButton.disabled = true;
-  formStatus.textContent = "Saving, searching YouTube and asking Claude… this can take up to a minute.";
+  formStatus.textContent = "Saving and building your report… this can take up to a minute.";
   try {
     const response = await fetch("/api/ideas", {
       method: "POST",
@@ -221,24 +33,13 @@ form.addEventListener("submit", async (event) => {
     const body = await response.json();
     if (!response.ok) {
       showErrors(body.errors || {});
-      formStatus.textContent = "Please fix the highlighted fields.";
+      formStatus.textContent = body.error || "Please fix the highlighted fields.";
       return;
     }
-    showErrors({});
-    formStatus.textContent = "";
-    showResults(body);
-    form.hidden = true;
-    saved.hidden = false;
+    window.location.href = `/report.html?id=${encodeURIComponent(body.id)}`;
   } catch {
     formStatus.textContent = "Could not save. Check your connection and try again.";
   } finally {
     submitButton.disabled = false;
   }
-});
-
-document.getElementById("another").addEventListener("click", () => {
-  form.reset();
-  saved.hidden = true;
-  form.hidden = false;
-  form.elements.idea.focus();
 });

@@ -173,19 +173,6 @@ button:disabled {
   color: var(--muted);
 }
 
-.saved {
-  padding: 16px;
-  background: var(--surface);
-  border-radius: 8px;
-}
-
-.saved h2 {
-  margin-top: 0;
-}
-
-.saved h3 {
-  margin-bottom: 4px;
-}
 
 .videos {
   margin: 16px 0;
@@ -224,9 +211,6 @@ button:disabled {
   border-left-style: dashed;
 }
 
-.saved h4 {
-  margin: 16px 0 4px;
-}
 
 summary {
   cursor: pointer;
@@ -252,4 +236,77 @@ summary {
 #reframes li,
 #fact-checks li {
   margin-bottom: 8px;
+}
+
+.report section {
+  margin: 20px 0;
+  padding: 16px;
+  background: var(--surface);
+  border-radius: 8px;
+}
+
+.report section h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+}
+
+.report section h3 {
+  margin: 16px 0 4px;
+  font-size: 1.05rem;
+}
+
+.num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 0.95rem;
+}
+
+.idea-summary h2 {
+  margin: 8px 0 4px;
+}
+
+.idea-summary p {
+  margin: 4px 0;
+}
+
+.meta {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+a {
+  color: var(--accent);
+}
+
+.cost-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0;
+}
+
+.cost-table th,
+.cost-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+}
+
+.cost-table th:first-child,
+.cost-table td:first-child {
+  text-align: left;
+}
+
+.report .limits {
+  background: transparent;
+  border: 1px solid var(--border);
 }

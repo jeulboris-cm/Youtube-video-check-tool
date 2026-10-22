@@ -6,7 +6,7 @@ channels of the same size.
 
 ## Status
 
-Steps 1 to 5 of the build plan are done: a small Node.js server, an input
+Steps 1 to 6 of the build plan are done: a small Node.js server, an input
 form that saves each idea, a plain list of similar YouTube videos with
 their views, age and channel size, and a "Channels your size" view range, and Claude's shelf-life label, reframes,
 packaging suggestions and claims to verify. It works on phone and laptop.
@@ -33,7 +33,7 @@ computer and visit `http://<your-computer's-local-IP>:3000`.
 3. YouTube data ✅
 4. Channels your size ✅
 5. Claude reasoning ✅
-6. Report page
+6. Report page ✅
 7. Results and reminders
 8. Put it online
 
@@ -99,3 +99,24 @@ Search-trend data is not connected, so Claude is told not to guess it. Each
 report costs a few cents on the Claude API account. `CLAUDE_EFFORT` (low,
 medium, high) trades thinking depth against cost; the default is medium.
 If no key is set, the rest of the report still works and the page says so.
+
+## The report page
+
+After the form is sent, the tester lands on `/report.html?id=<id>`, which
+shows the six sections of the spec on one page, with a link to every source
+video:
+
+1. **Similar videos**: the 12 most relevant.
+2. **Channels your size**: the view range, or the labelled estimate.
+3. **Who owns the subject**: the share of views taken by channels with 1M+
+   subscribers (dominant at 60% or more), and small channels (under 100K)
+   that broke through (10K+ views and more views than subscribers).
+4. **Shelf life**: from Claude when a key is set, otherwise from the free
+   rule-based check in `lib/shelflife.js` (wording, older similar videos and
+   the tester's news answer, each pointing to short, long or unclear).
+5. **Cost versus range**: cost per 1,000 views at the low, middle and high
+   end of the range.
+6. **Packaging suggestions** and claims to verify: from Claude only.
+
+The report is saved with the idea, so the link shows the report as it was on
+the day of the check. Ids are random, so only people with the link can open it.
