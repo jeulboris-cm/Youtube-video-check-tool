@@ -23,11 +23,11 @@ app.post("/api/ideas", async (req, res) => {
   if (Object.keys(errors).length > 0) {
     return res.status(400).json({ errors });
   }
-  const record = ideas.save(values);
+  const record = await ideas.save(values);
   try {
     // Keep a snapshot of the report as it was that day, as the spec asks.
     const report = await buildReport(record);
-    ideas.update(record.id, { channelSubscribers: report.channel?.subscribers ?? null, report });
+    await ideas.update(record.id, { channelSubscribers: report.channel?.subscribers ?? null, report });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Your idea was saved, but the report could not be built. Try again." });
@@ -52,8 +52,8 @@ function publicView(record) {
 
 // Returns a saved idea and its report, for the report page. Ids are random
 // and unguessable, so only someone with the link can see it.
-app.get("/api/ideas/:id", (req, res) => {
-  const record = ideas.find(req.params.id);
+app.get("/api/ideas/:id", async (req, res) => {
+  const record = await ideas.find(req.params.id);
   if (!record) return res.status(404).json({ error: "Report not found." });
   res.json(publicView(record));
 });
@@ -62,7 +62,7 @@ app.get("/api/ideas/:id", (req, res) => {
 // 30 and 90 days. With a link, the current views are also read from
 // YouTube (1 quota unit).
 app.post("/api/ideas/:id/results", async (req, res) => {
-  const record = ideas.find(req.params.id);
+  const record = await ideas.find(req.params.id);
   if (!record) return res.status(404).json({ error: "Report not found." });
   const { errors, values } = ideas.validateResults(req.body || {});
   if (Object.keys(errors).length > 0) return res.status(400).json({ errors });
@@ -79,18 +79,38 @@ app.post("/api/ideas/:id/results", async (req, res) => {
   } else {
     results.video = null;
   }
-  res.json(publicView(ideas.update(record.id, { results })));
+  res.json(publicView(await ideas.update(record.id, { results })));
 });
 
 // Saves the answers to "Was this useful?" and "Would it have changed your
 // decision?".
-app.post("/api/ideas/:id/feedback", (req, res) => {
-  const record = ideas.find(req.params.id);
+app.post("/api/ideas/:id/feedback", async (req, res) => {
+  const record = await ideas.find(req.params.id);
   if (!record) return res.status(404).json({ error: "Report not found." });
   const { errors, values } = ideas.validateFeedback(req.body || {});
   if (Object.keys(errors).length > 0) return res.status(400).json({ errors });
   const feedback = { ...values, at: new Date().toISOString() };
-  res.json(publicView(ideas.update(record.id, { feedback })));
+  res.json(publicView(await ideas.update(record.id, { feedback })));
+});
+
+// Sends the reminder emails that are due. A free scheduler (the GitHub
+// Actions workflow in .github/workflows/reminders.yml) calls this once a
+// day, which also wakes the app on hosts that put it to sleep. It needs the
+// CRON_SECRET, so strangers cannot trigger it.
+app.post("/api/cron/reminders", async (req, res) => {
+  const secret = process.env.CRON_SECRET;
+  if (!secret || req.get("authorization") !== `Bearer ${secret}`) return res.status(401).json({ error: "Not allowed." });
+  res.json(await reminders.sendDueReminders());
+});
+
+// Any error not handled above: log it and answer with a plain message.
+app.use((error, req, res, next) => {
+  // Malformed or oversized requests are the sender's problem, not a crash.
+  if (error.status >= 400 && error.status < 500) {
+    return res.status(error.status).json({ error: "The request could not be read." });
+  }
+  console.error(error);
+  res.status(500).json({ error: "Something went wrong on the server. Try again." });
 });
 
 // Listen on all interfaces so a phone on the same Wi-Fi can open the page.

@@ -11,6 +11,11 @@ form that saves each idea, a plain list of similar YouTube videos with
 their views, age and channel size, and a "Channels your size" view range, and Claude's shelf-life label, reframes,
 packaging suggestions and claims to verify. It works on phone and laptop.
 
+## Put it online
+
+See [DEPLOY.md](DEPLOY.md): free hosting on Render, a free Neon database,
+free Brevo reminder emails and a daily GitHub Actions run.
+
 ## Run it locally
 
 You need [Node.js](https://nodejs.org) 20 or newer.
@@ -39,9 +44,10 @@ computer and visit `http://<your-computer's-local-IP>:3000`.
 
 ## Where ideas are saved
 
-Each form submission is saved to `data/ideas.json` on the server. That folder
-is left out of git so testers' unpublished ideas never reach the repository.
-Set `DATA_DIR` to store it somewhere else.
+On a laptop, data is saved as JSON files in `data/` (left out of git, so
+testers' unpublished ideas never reach the repository; set `DATA_DIR` to
+change the folder). When `DATABASE_URL` is set, everything is stored in that
+Postgres database instead (see `lib/store.js`).
 
 ## YouTube quota
 

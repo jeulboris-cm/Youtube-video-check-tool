@@ -1,0 +1,33 @@
+# Render blueprint: creates the Idea Check web service on Render's free plan.
+# In Render: New > Blueprint, pick this repository. Settings marked
+# "sync: false" are asked for during setup (see DEPLOY.md).
+services:
+  - type: web
+    name: idea-check
+    runtime: node
+    plan: free
+    branch: claude/step-one-pq5u7t
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: SMTP_HOST
+        value: smtp-relay.brevo.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: CRON_SECRET
+        generateValue: true
+      - key: ANTHROPIC_API_KEY
+        sync: false
