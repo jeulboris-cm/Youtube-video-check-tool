@@ -45,9 +45,20 @@ Set `DATA_DIR` to store it somewhere else.
 ## YouTube quota
 
 YouTube gives about 10,000 free "units" a day. Each idea check costs about
-103 units (one search at 100, plus 1 each for the channel, the videos and
-their channels), so roughly 90 checks a day. To stay safe the tool:
+204 units: two searches at 100 each (one for the idea, one for the working
+title), plus a few single units for the channel, the videos and their
+channels. That is roughly 45 checks a day. To stay safe the tool:
 
-- reuses a search for 24 hours if the same idea is checked again (2-3 units),
+- reuses a search for 24 hours if the same text is searched again (about 4 units),
 - counts units used per day in `data/youtube-usage.json`,
 - stops searching at 8,000 units a day (change with `YOUTUBE_DAILY_UNIT_CAP`).
+
+## How similar videos are chosen
+
+1. YouTube is searched twice, with the idea and with the working title
+   (50 results each).
+2. Shorts, clips under 3 minutes and videos under 2 weeks old are removed.
+3. Each video is scored on its position in the two searches and on how many
+   key words of the idea and title appear in its own title, description and
+   tags. Videos sharing fewer than 2 key words are removed.
+4. The 12 best are shown.

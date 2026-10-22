@@ -26,7 +26,7 @@ app.post("/api/ideas", async (req, res) => {
 
   try {
     result.channel = await youtube.lookupChannel(record.channelUrl);
-    result.similarVideos = await youtube.findSimilarVideos(record.idea);
+    result.similarVideos = await youtube.findSimilarVideos(record);
     // Keep a snapshot of what was shown that day, as the spec asks.
     ideas.update(record.id, {
       channelSubscribers: result.channel?.subscribers ?? null,
