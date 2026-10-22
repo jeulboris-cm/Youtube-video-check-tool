@@ -6,8 +6,9 @@ channels of the same size.
 
 ## Status
 
-Steps 1 and 2 of the build plan are done: a small Node.js server and an
-input form that saves each idea. It works on phone and laptop.
+Steps 1 to 3 of the build plan are done: a small Node.js server, an input
+form that saves each idea, and a plain list of similar YouTube videos with
+their views, age and channel size. It works on phone and laptop.
 
 ## Run it locally
 
@@ -18,7 +19,8 @@ npm install
 npm start
 ```
 
-Then open http://localhost:3000 in your browser.
+Set your YouTube Data API key first (copy `.env.example` to `.env`, or set
+`YOUTUBE_API_KEY` in your environment). Then open http://localhost:3000 in your browser.
 
 To open it on your phone, connect the phone to the same Wi-Fi as your
 computer and visit `http://<your-computer's-local-IP>:3000`.
@@ -27,7 +29,7 @@ computer and visit `http://<your-computer's-local-IP>:3000`.
 
 1. Project setup ✅
 2. Input form ✅
-3. YouTube data
+3. YouTube data ✅
 4. Channels your size
 5. Claude reasoning
 6. Report page
@@ -39,3 +41,13 @@ computer and visit `http://<your-computer's-local-IP>:3000`.
 Each form submission is saved to `data/ideas.json` on the server. That folder
 is left out of git so testers' unpublished ideas never reach the repository.
 Set `DATA_DIR` to store it somewhere else.
+
+## YouTube quota
+
+YouTube gives about 10,000 free "units" a day. Each idea check costs about
+103 units (one search at 100, plus 1 each for the channel, the videos and
+their channels), so roughly 90 checks a day. To stay safe the tool:
+
+- reuses a search for 24 hours if the same idea is checked again (2-3 units),
+- counts units used per day in `data/youtube-usage.json`,
+- stops searching at 8,000 units a day (change with `YOUTUBE_DAILY_UNIT_CAP`).
