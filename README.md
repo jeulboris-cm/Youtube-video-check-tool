@@ -6,9 +6,9 @@ channels of the same size.
 
 ## Status
 
-Steps 1 to 3 of the build plan are done: a small Node.js server, an input
-form that saves each idea, and a plain list of similar YouTube videos with
-their views, age and channel size. It works on phone and laptop.
+Steps 1 to 4 of the build plan are done: a small Node.js server, an input
+form that saves each idea, a plain list of similar YouTube videos with
+their views, age and channel size, and a "Channels your size" view range. It works on phone and laptop.
 
 ## Run it locally
 
@@ -30,7 +30,7 @@ computer and visit `http://<your-computer's-local-IP>:3000`.
 1. Project setup ✅
 2. Input form ✅
 3. YouTube data ✅
-4. Channels your size
+4. Channels your size ✅
 5. Claude reasoning
 6. Report page
 7. Results and reminders
@@ -62,3 +62,11 @@ channels. That is roughly 45 checks a day. To stay safe the tool:
    key words of the idea and title appear in its own title, description and
    tags. Videos sharing fewer than 2 key words are removed.
 4. The 12 best are shown.
+
+## Channels your size
+
+Every relevant video found (not only the 12 shown) is filtered to channels
+with half to double the tester's subscriber count. If at least 5 remain, the
+page shows the range most of them got (25th to 75th percentile), the middle
+value, the lowest and highest, and lists every video used. With fewer than 5
+it says the data is too thin and shows no range.

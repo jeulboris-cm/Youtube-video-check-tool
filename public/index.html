@@ -23,7 +23,8 @@
       <div class="field">
         <label for="idea">Your idea in one or two sentences <span class="req">Required</span></label>
         <textarea id="idea" name="idea" rows="3" maxlength="1000" required
-          placeholder="How a telecom company ran its network in Africa"></textarea>
+          placeholder="How MTN ran its mobile network across Africa"></textarea>
+        <p class="hint">Name the specific people, companies or places involved (for example "MTN", not "a telecom company"). This helps find videos that are truly similar.</p>
         <p class="error" id="idea-error"></p>
       </div>
 
@@ -87,6 +88,15 @@
       <p class="hint">Found by searching YouTube for your idea and your working title. Shorts, clips under 3 minutes and videos less than 2 weeks old are left out. The full report arrives in a later version of the tool.</p>
       <p class="error" id="youtube-error"></p>
       <ol id="videos" class="videos"></ol>
+
+      <div id="your-size" hidden>
+        <h3>Channels your size</h3>
+        <p class="hint" id="your-size-band"></p>
+        <div id="your-size-range" class="range" hidden></div>
+        <p id="your-size-note"></p>
+        <ol id="your-size-videos" class="videos"></ol>
+        <p class="hint">Views also depend on how much YouTube shows a video to people, which small channels do not control. Treat this as a range seen on similar channels, not a promise.</p>
+      </div>
       <button type="button" id="another">Check another idea</button>
     </section>
   </main>

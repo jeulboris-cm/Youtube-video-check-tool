@@ -5,6 +5,11 @@ const saved = document.getElementById("saved");
 const channelLine = document.getElementById("channel-line");
 const youtubeError = document.getElementById("youtube-error");
 const videoList = document.getElementById("videos");
+const yourSize = document.getElementById("your-size");
+const yourSizeBand = document.getElementById("your-size-band");
+const yourSizeRange = document.getElementById("your-size-range");
+const yourSizeNote = document.getElementById("your-size-note");
+const yourSizeVideos = document.getElementById("your-size-videos");
 
 const FIELDS = ["idea", "workingTitle", "channelUrl", "lengthMinutes", "costUsd", "productionDays", "newsTied"];
 
@@ -53,6 +58,12 @@ function showResults(result) {
   if (!result.youtubeError && videos.length === 0) {
     youtubeError.textContent = "No similar videos found on YouTube for this idea.";
   }
+  renderVideos(videoList, videos);
+  showYourSize(result.yourSize);
+}
+
+function renderVideos(list, videos) {
+  list.replaceChildren();
   for (const video of videos) {
     const item = document.createElement("li");
     const link = document.createElement("a");
@@ -68,7 +79,42 @@ function showResults(result) {
       `${video.channelTitle} (${formatCount(video.channelSubscribers, "subscribers")})`,
     ].join(" · ");
     item.append(link, meta);
-    videoList.append(item);
+    list.append(item);
+  }
+}
+
+function showYourSize(data) {
+  yourSize.hidden = !data;
+  if (!data) return;
+  yourSizeRange.hidden = true;
+  yourSizeBand.textContent = data.band
+    ? `Similar videos from channels with ${numberFormat.format(data.band.min)} to ${numberFormat.format(data.band.max)} subscribers (half to double your size).`
+    : "";
+  renderVideos(yourSizeVideos, data.videos);
+
+  if (data.status === "unknown_size") {
+    yourSizeNote.textContent =
+      "We need your subscriber count to compare with channels your size. Use a channel link like youtube.com/@name, and make sure your subscriber count is public.";
+  } else if (data.status === "thin") {
+    const found = data.videos.length;
+    yourSizeNote.textContent =
+      `Not enough data: we found ${found === 0 ? "no" : `only ${found}`} similar video${found === 1 ? "" : "s"} from channels your size, ` +
+      `and need at least ${data.minimum} to give an honest range. ` +
+      "Try naming the specific people, companies or places in your idea.";
+  } else {
+    const r = data.range;
+    yourSizeRange.replaceChildren();
+    const main = document.createElement("p");
+    main.append("Most of these videos got ");
+    const strong = document.createElement("strong");
+    strong.textContent = `${numberFormat.format(r.low)} to ${numberFormat.format(r.high)} views`;
+    main.append(strong, ` (middle: ${numberFormat.format(r.middle)}).`);
+    const extremes = document.createElement("p");
+    extremes.className = "meta";
+    extremes.textContent = `Lowest: ${numberFormat.format(r.lowest)} · Highest: ${numberFormat.format(r.highest)} · Based on the ${data.videos.length} videos below.`;
+    yourSizeRange.append(main, extremes);
+    yourSizeRange.hidden = false;
+    yourSizeNote.textContent = "";
   }
 }
 

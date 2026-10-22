@@ -2,6 +2,10 @@ const path = require("path");
 const express = require("express");
 const ideas = require("./lib/ideas");
 const youtube = require("./lib/youtube");
+const compare = require("./lib/compare");
+
+// How many of the most relevant videos the "Similar videos" list shows.
+const SHOWN_SIMILAR = 12;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,15 +26,20 @@ app.post("/api/ideas", async (req, res) => {
     return res.status(400).json({ errors });
   }
   const record = ideas.save(values);
-  const result = { id: record.id, createdAt: record.createdAt, channel: null, similarVideos: null };
+  const result = { id: record.id, createdAt: record.createdAt, channel: null, similarVideos: null, yourSize: null };
 
   try {
     result.channel = await youtube.lookupChannel(record.channelUrl);
-    result.similarVideos = await youtube.findSimilarVideos(record);
+    const allSimilar = await youtube.findSimilarVideos(record);
+    result.similarVideos = allSimilar.slice(0, SHOWN_SIMILAR);
+    // The size filter uses every relevant video found, not only the ones
+    // shown above, so there is more chance of enough comparable videos.
+    result.yourSize = compare.channelsYourSize(allSimilar, result.channel?.subscribers);
     // Keep a snapshot of what was shown that day, as the spec asks.
     ideas.update(record.id, {
       channelSubscribers: result.channel?.subscribers ?? null,
       similarVideos: result.similarVideos,
+      yourSize: result.yourSize,
       similarVideosCheckedAt: new Date().toISOString(),
     });
   } catch (error) {
