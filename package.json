@@ -1,0 +1,17 @@
+{
+  "name": "idea-check",
+  "version": "0.1.0",
+  "description": "Idea Check: tells a YouTuber whether a video idea is worth making, using data from similar videos on channels of the same size.",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
