@@ -78,6 +78,7 @@ With fewer than 5, the tool first searches one page deeper. If there are
 still fewer than 5, it says so and shows no range from channels that size.
 Instead it shows an estimate, clearly labelled as one: the views per
 subscriber that most similar videos got (middle half), applied to the
-tester's subscriber count, with the list of videos it uses. Channels under
-100 subscribers are left out of the estimate because their numbers swing
-too much.
+tester's subscriber count, with the list of videos it uses. The estimate
+only uses channels from a tenth of the tester's size up to 50 times it, and
+never channels under 100 subscribers, whose numbers swing too much. It also
+needs at least 5 such videos.

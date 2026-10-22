@@ -101,6 +101,7 @@ function showEstimate(data) {
   how.className = "meta";
   how.textContent =
     `This is an estimate, not direct evidence from channels your size. Most of the ${data.videos.length} similar videos ` +
+    `from channels with ${numberFormat.format(data.band.min)} to ${numberFormat.format(data.band.max)} subscribers ` +
     `got ${ratio.format(per.low)} to ${ratio.format(per.high)} views per subscriber of their channel; ` +
     "we applied that to your subscriber count. Bigger and smaller channels can behave differently.";
   estimateRange.append(main, how);
