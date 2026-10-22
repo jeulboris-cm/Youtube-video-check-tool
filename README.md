@@ -6,8 +6,8 @@ channels of the same size.
 
 ## Status
 
-Step 1 of the build plan (project setup) is done: a blank page served by a
-small Node.js server, working on phone and laptop.
+Steps 1 and 2 of the build plan are done: a small Node.js server and an
+input form that saves each idea. It works on phone and laptop.
 
 ## Run it locally
 
@@ -26,10 +26,16 @@ computer and visit `http://<your-computer's-local-IP>:3000`.
 ## Build plan
 
 1. Project setup ✅
-2. Input form
+2. Input form ✅
 3. YouTube data
 4. Channels your size
 5. Claude reasoning
 6. Report page
 7. Results and reminders
 8. Put it online
+
+## Where ideas are saved
+
+Each form submission is saved to `data/ideas.json` on the server. That folder
+is left out of git so testers' unpublished ideas never reach the repository.
+Set `DATA_DIR` to store it somewhere else.

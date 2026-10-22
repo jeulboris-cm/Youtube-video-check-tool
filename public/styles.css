@@ -1,16 +1,24 @@
 :root {
   --bg: #ffffff;
+  --surface: #f6f7f8;
+  --border: #c9cdd2;
   --text: #1a1a1a;
   --muted: #5f6368;
   --accent: #c4302b;
+  --accent-text: #ffffff;
+  --error: #b3261e;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #121212;
+    --surface: #1e1e1e;
+    --border: #444a50;
     --text: #f1f1f1;
     --muted: #a0a0a0;
     --accent: #ff5a52;
+    --accent-text: #121212;
+    --error: #ff8a80;
   }
 }
 
@@ -42,6 +50,135 @@ h1 {
   font-size: 1.1rem;
 }
 
-.status {
+.privacy {
+  padding: 10px 12px;
+  background: var(--surface);
+  border-radius: 8px;
   color: var(--muted);
+}
+
+.field {
+  margin-bottom: 18px;
+}
+
+label,
+.label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.req {
+  margin-left: 6px;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+input[type="text"],
+input[type="url"],
+input[type="number"],
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  /* 16px stops phones from zooming in when a field is tapped. */
+  font: inherit;
+  font-size: 16px;
+}
+
+input:focus,
+textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+[aria-invalid="true"] {
+  border-color: var(--error);
+}
+
+.hint {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.error {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--error);
+}
+
+.error:empty {
+  display: none;
+}
+
+fieldset.optional {
+  margin: 24px 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+legend {
+  padding: 0 6px;
+  color: var(--muted);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0 16px;
+}
+
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.choices label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-weight: 400;
+}
+
+button {
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+#submit {
+  width: 100%;
+}
+
+.form-status {
+  min-height: 1.5em;
+  color: var(--muted);
+}
+
+.saved {
+  padding: 16px;
+  background: var(--surface);
+  border-radius: 8px;
+}
+
+.saved h2 {
+  margin-top: 0;
 }

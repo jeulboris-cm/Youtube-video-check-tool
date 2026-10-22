@@ -14,7 +14,78 @@
       channels your size actually got, how long the idea will stay relevant,
       and how to package it.
     </p>
-    <p class="status">Coming soon: the idea form.</p>
+
+    <form id="idea-form" novalidate>
+      <p class="privacy">
+        Your idea is private. It is never shown to other users.
+      </p>
+
+      <div class="field">
+        <label for="idea">Your idea in one or two sentences <span class="req">Required</span></label>
+        <textarea id="idea" name="idea" rows="3" maxlength="1000" required
+          placeholder="How a telecom company ran its network in Africa"></textarea>
+        <p class="error" id="idea-error"></p>
+      </div>
+
+      <div class="field">
+        <label for="workingTitle">Working title <span class="req">Required</span></label>
+        <input id="workingTitle" name="workingTitle" type="text" maxlength="200" required
+          placeholder="The most hated telecom company in Africa">
+        <p class="error" id="workingTitle-error"></p>
+      </div>
+
+      <div class="field">
+        <label for="channelUrl">Your channel link <span class="req">Required</span></label>
+        <input id="channelUrl" name="channelUrl" type="url" inputmode="url" required
+          placeholder="https://www.youtube.com/@yourchannel">
+        <p class="hint">Used to read your subscriber count and past results.</p>
+        <p class="error" id="channelUrl-error"></p>
+      </div>
+
+      <fieldset class="optional">
+        <legend>Optional, but makes the report more useful</legend>
+
+        <div class="row">
+          <div class="field">
+            <label for="lengthMinutes">Planned length (minutes)</label>
+            <input id="lengthMinutes" name="lengthMinutes" type="number" inputmode="decimal" min="0" step="any" placeholder="18">
+            <p class="error" id="lengthMinutes-error"></p>
+          </div>
+
+          <div class="field">
+            <label for="costUsd">Production cost (USD)</label>
+            <input id="costUsd" name="costUsd" type="number" inputmode="decimal" min="0" step="any" placeholder="350">
+            <p class="error" id="costUsd-error"></p>
+          </div>
+
+          <div class="field">
+            <label for="productionDays">Production time (days)</label>
+            <input id="productionDays" name="productionDays" type="number" inputmode="numeric" min="0" step="1" placeholder="30">
+            <p class="error" id="productionDays-error"></p>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="label" id="newsTied-label">Is the idea tied to a recent news event?</span>
+          <div class="choices" role="radiogroup" aria-labelledby="newsTied-label">
+            <label><input type="radio" name="newsTied" value="yes"> Yes</label>
+            <label><input type="radio" name="newsTied" value="no"> No</label>
+            <label><input type="radio" name="newsTied" value="not_sure"> Not sure</label>
+          </div>
+          <p class="error" id="newsTied-error"></p>
+        </div>
+      </fieldset>
+
+      <button type="submit" id="submit">Check this idea</button>
+      <p class="form-status" id="form-status" role="status"></p>
+    </form>
+
+    <section id="saved" class="saved" hidden>
+      <h2>Idea saved</h2>
+      <p>Your idea is saved. The full report arrives in a later version of the tool.</p>
+      <button type="button" id="another">Check another idea</button>
+    </section>
   </main>
+  <script src="app.js"></script>
 </body>
 </html>
