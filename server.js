@@ -30,11 +30,19 @@ app.post("/api/ideas", async (req, res) => {
 
   try {
     result.channel = await youtube.lookupChannel(record.channelUrl);
-    const allSimilar = await youtube.findSimilarVideos(record);
-    result.similarVideos = allSimilar.slice(0, SHOWN_SIMILAR);
+    const subscribers = result.channel?.subscribers;
     // The size filter uses every relevant video found, not only the ones
-    // shown above, so there is more chance of enough comparable videos.
-    result.yourSize = compare.channelsYourSize(allSimilar, result.channel?.subscribers);
+    // shown, so there is more chance of enough comparable videos.
+    let allSimilar = await youtube.findSimilarVideos(record);
+    result.yourSize = compare.channelsYourSize(allSimilar, subscribers, result.channel?.id);
+    // Too few from channels this size: search one page deeper (about 200
+    // more units) before falling back to the per-subscriber estimate.
+    if (result.yourSize.status === "thin") {
+      allSimilar = await youtube.findSimilarVideos(record, { pages: 2 });
+      result.yourSize = compare.channelsYourSize(allSimilar, subscribers, result.channel?.id);
+      result.yourSize.searchedDeeper = true;
+    }
+    result.similarVideos = allSimilar.slice(0, SHOWN_SIMILAR);
     // Keep a snapshot of what was shown that day, as the spec asks.
     ideas.update(record.id, {
       channelSubscribers: result.channel?.subscribers ?? null,

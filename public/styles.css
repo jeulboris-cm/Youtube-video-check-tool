@@ -219,3 +219,16 @@ button:disabled {
 .range strong {
   font-size: 1.25rem;
 }
+
+.range.estimate {
+  border-left-style: dashed;
+}
+
+.saved h4 {
+  margin: 16px 0 4px;
+}
+
+summary {
+  cursor: pointer;
+  color: var(--muted);
+}

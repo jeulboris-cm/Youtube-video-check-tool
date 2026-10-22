@@ -10,6 +10,10 @@ const yourSizeBand = document.getElementById("your-size-band");
 const yourSizeRange = document.getElementById("your-size-range");
 const yourSizeNote = document.getElementById("your-size-note");
 const yourSizeVideos = document.getElementById("your-size-videos");
+const estimate = document.getElementById("estimate");
+const estimateRange = document.getElementById("estimate-range");
+const estimateCount = document.getElementById("estimate-count");
+const estimateVideos = document.getElementById("estimate-videos");
 
 const FIELDS = ["idea", "workingTitle", "channelUrl", "lengthMinutes", "costUsd", "productionDays", "newsTied"];
 
@@ -83,10 +87,33 @@ function renderVideos(list, videos) {
   }
 }
 
+function showEstimate(data) {
+  const r = data.range;
+  const per = data.viewsPerSubscriber;
+  const ratio = new Intl.NumberFormat("en", { maximumFractionDigits: 2 });
+  estimateRange.replaceChildren();
+  const main = document.createElement("p");
+  main.append("If your video does like most similar videos, relative to channel size: ");
+  const strong = document.createElement("strong");
+  strong.textContent = `${numberFormat.format(r.low)} to ${numberFormat.format(r.high)} views`;
+  main.append(strong, ` (middle: ${numberFormat.format(r.middle)}).`);
+  const how = document.createElement("p");
+  how.className = "meta";
+  how.textContent =
+    `This is an estimate, not direct evidence from channels your size. Most of the ${data.videos.length} similar videos ` +
+    `got ${ratio.format(per.low)} to ${ratio.format(per.high)} views per subscriber of their channel; ` +
+    "we applied that to your subscriber count. Bigger and smaller channels can behave differently.";
+  estimateRange.append(main, how);
+  estimateCount.textContent = data.videos.length;
+  renderVideos(estimateVideos, data.videos);
+  estimate.hidden = false;
+}
+
 function showYourSize(data) {
   yourSize.hidden = !data;
   if (!data) return;
   yourSizeRange.hidden = true;
+  estimate.hidden = true;
   yourSizeBand.textContent = data.band
     ? `Similar videos from channels with ${numberFormat.format(data.band.min)} to ${numberFormat.format(data.band.max)} subscribers (half to double your size).`
     : "";
@@ -99,8 +126,10 @@ function showYourSize(data) {
     const found = data.videos.length;
     yourSizeNote.textContent =
       `Not enough data: we found ${found === 0 ? "no" : `only ${found}`} similar video${found === 1 ? "" : "s"} from channels your size, ` +
-      `and need at least ${data.minimum} to give an honest range. ` +
-      "Try naming the specific people, companies or places in your idea.";
+      `and need at least ${data.minimum} to give a range from channels your size` +
+      (data.searchedDeeper ? ", even after searching deeper." : ".") +
+      " Naming the specific people, companies or places in your idea can help.";
+    if (data.estimate) showEstimate(data.estimate);
   } else {
     const r = data.range;
     yourSizeRange.replaceChildren();

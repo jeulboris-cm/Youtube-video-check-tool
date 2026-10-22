@@ -47,7 +47,10 @@ Set `DATA_DIR` to store it somewhere else.
 YouTube gives about 10,000 free "units" a day. Each idea check costs about
 204 units: two searches at 100 each (one for the idea, one for the working
 title), plus a few single units for the channel, the videos and their
-channels. That is roughly 45 checks a day. To stay safe the tool:
+channels. That is roughly 45 checks a day. When the first page of results
+has fewer than 5 videos from channels the tester's size, the tool fetches a
+second page of both searches, so that check costs about 404 units. Expect
+roughly 25 to 45 checks a day. To stay safe the tool:
 
 - reuses a search for 24 hours if the same text is searched again (about 4 units),
 - counts units used per day in `data/youtube-usage.json`,
@@ -68,5 +71,13 @@ channels. That is roughly 45 checks a day. To stay safe the tool:
 Every relevant video found (not only the 12 shown) is filtered to channels
 with half to double the tester's subscriber count. If at least 5 remain, the
 page shows the range most of them got (25th to 75th percentile), the middle
-value, the lowest and highest, and lists every video used. With fewer than 5
-it says the data is too thin and shows no range.
+value, the lowest and highest, and lists every video used. The tester's own
+channel is left out.
+
+With fewer than 5, the tool first searches one page deeper. If there are
+still fewer than 5, it says so and shows no range from channels that size.
+Instead it shows an estimate, clearly labelled as one: the views per
+subscriber that most similar videos got (middle half), applied to the
+tester's subscriber count, with the list of videos it uses. Channels under
+100 subscribers are left out of the estimate because their numbers swing
+too much.
