@@ -2,7 +2,7 @@ const form = document.getElementById("idea-form");
 const submitButton = document.getElementById("submit");
 const formStatus = document.getElementById("form-status");
 
-const FIELDS = ["idea", "workingTitle", "channelUrl", "lengthMinutes", "costUsd", "productionDays", "newsTied"];
+const FIELDS = ["idea", "workingTitle", "channelUrl", "lengthMinutes", "costUsd", "productionDays", "newsTied", "email"];
 
 function showErrors(errors) {
   for (const field of FIELDS) {
@@ -23,6 +23,7 @@ form.addEventListener("submit", async (event) => {
   const data = Object.fromEntries(new FormData(form));
 
   submitButton.disabled = true;
+  submitButton.classList.add("loading");
   formStatus.textContent = "Saving and building your report… this can take up to a minute.";
   try {
     const response = await fetch("/api/ideas", {
@@ -41,5 +42,6 @@ form.addEventListener("submit", async (event) => {
     formStatus.textContent = "Could not save. Check your connection and try again.";
   } finally {
     submitButton.disabled = false;
+    submitButton.classList.remove("loading");
   }
 });

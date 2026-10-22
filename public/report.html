@@ -8,15 +8,24 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <header class="site-header">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      Idea Check
+    </a>
+    <a class="header-link" href="/">Check another idea</a>
+  </header>
+
   <main class="container report">
-    <p><a href="/">← Check another idea</a></p>
-    <h1>Idea Check report</h1>
     <p id="loading" role="status">Loading your report…</p>
     <p class="error" id="load-error"></p>
 
     <div id="report" hidden>
       <header class="idea-summary">
-        <h2 id="idea-title"></h2>
+        <p class="eyebrow">Idea Check report</p>
+        <h1 id="idea-title"></h1>
         <p id="idea-text"></p>
         <p class="meta" id="idea-meta"></p>
       </header>
@@ -89,6 +98,71 @@
           YouTube shows a video to people, which small channels do not control: in our own tests, videos with
           similar click rates got anywhere from 281 to 53,600 impressions.
         </p>
+      </section>
+
+      <section id="feedback">
+        <h2><span class="num">7</span> Was this useful?</h2>
+        <form id="feedback-form" novalidate>
+          <div class="field">
+            <span class="label" id="useful-label">Was this report useful?</span>
+            <div class="segmented" role="radiogroup" aria-labelledby="useful-label">
+              <label><input type="radio" name="useful" value="yes"><span>Yes</span></label>
+              <label><input type="radio" name="useful" value="no"><span>No</span></label>
+            </div>
+            <p class="error" id="useful-error"></p>
+          </div>
+          <div class="field">
+            <span class="label" id="decision-label">Would it have changed your decision?</span>
+            <div class="segmented" role="radiogroup" aria-labelledby="decision-label">
+              <label><input type="radio" name="decision" value="changed"><span>Changed</span></label>
+              <label><input type="radio" name="decision" value="confirmed"><span>Confirmed</span></label>
+              <label><input type="radio" name="decision" value="no_effect"><span>No effect</span></label>
+            </div>
+            <p class="error" id="decision-error"></p>
+          </div>
+          <div class="field">
+            <label for="comment">Anything else? <span class="optional-tag">Optional</span></label>
+            <textarea id="comment" name="comment" rows="2" maxlength="2000" placeholder="What was missing, wrong or most helpful?"></textarea>
+            <p class="error" id="comment-error"></p>
+          </div>
+          <button type="submit" class="secondary" id="feedback-submit">Send feedback</button>
+          <p class="form-status" id="feedback-status" role="status"></p>
+        </form>
+      </section>
+
+      <section id="results">
+        <h2><span class="num">8</span> Your real results</h2>
+        <p id="results-intro"></p>
+        <div id="results-summary" hidden></div>
+        <form id="results-form" novalidate>
+          <div class="field">
+            <label for="videoUrl">Link to the published video</label>
+            <input id="videoUrl" name="videoUrl" type="url" inputmode="url" placeholder="https://www.youtube.com/watch?v=…">
+            <p class="hint">Optional. With a link, we read the video's current views from YouTube for you.</p>
+            <p class="error" id="videoUrl-error"></p>
+          </div>
+          <span class="label">Views after…</span>
+          <div class="row three compact">
+            <div class="field">
+              <label for="views7" class="sub-label">7 days</label>
+              <input id="views7" name="views7" type="number" inputmode="numeric" min="0" step="1">
+              <p class="error" id="views7-error"></p>
+            </div>
+            <div class="field">
+              <label for="views30" class="sub-label">30 days</label>
+              <input id="views30" name="views30" type="number" inputmode="numeric" min="0" step="1">
+              <p class="error" id="views30-error"></p>
+            </div>
+            <div class="field">
+              <label for="views90" class="sub-label">90 days</label>
+              <input id="views90" name="views90" type="number" inputmode="numeric" min="0" step="1">
+              <p class="error" id="views90-error"></p>
+            </div>
+          </div>
+          <p class="hint">YouTube Studio shows views by day under Analytics. Fill in what you have; you can come back later for the rest.</p>
+          <button type="submit" class="secondary" id="results-submit">Save results</button>
+          <p class="form-status" id="results-status" role="status"></p>
+        </form>
       </section>
     </div>
   </main>

@@ -239,6 +239,125 @@ function showPackaging(analysis) {
   $("packaging-block").hidden = false;
 }
 
+// Shows field errors under a small form and focuses the first one.
+function showFormErrors(form, fields, errors) {
+  for (const field of fields) {
+    $(`${field}-error`).textContent = errors[field] || "";
+  }
+  const first = fields.find((f) => errors[f]);
+  if (first) {
+    const input = form.elements[first];
+    (input.focus ? input : input[0]).focus();
+  }
+}
+
+// Sends a small form as JSON and returns the updated idea, or null when
+// the server rejected it (errors are then shown under the fields).
+async function postForm(form, url, fields, status, button) {
+  button.disabled = true;
+  status.textContent = "Saving…";
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(Object.fromEntries(new FormData(form))),
+    });
+    const body = await response.json();
+    if (!response.ok) {
+      showFormErrors(form, fields, body.errors || {});
+      status.textContent = body.error || "Please fix the highlighted fields.";
+      return null;
+    }
+    showFormErrors(form, fields, {});
+    return body;
+  } catch {
+    status.textContent = "Could not save. Check your connection and try again.";
+    return null;
+  } finally {
+    button.disabled = false;
+  }
+}
+
+const DECISIONS = { changed: "changed your decision", confirmed: "confirmed your decision", no_effect: "had no effect on your decision" };
+
+function showFeedback(idea) {
+  const form = $("feedback-form");
+  const feedback = idea.feedback;
+  if (feedback) {
+    form.elements.useful.value = feedback.useful;
+    form.elements.decision.value = feedback.decision;
+    form.elements.comment.value = feedback.comment || "";
+    $("feedback-status").textContent =
+      `Thanks! You said the report was ${feedback.useful === "yes" ? "useful" : "not useful"} and ${DECISIONS[feedback.decision]}. You can change your answers any time.`;
+  }
+}
+
+// The range the report gave: from channels this size, or the estimate.
+function predictedRange(report) {
+  if (report.yourSize?.range) return { ...report.yourSize.range, basis: "channels your size" };
+  if (report.yourSize?.estimate) return { ...report.yourSize.estimate.range, basis: "the estimate" };
+  return null;
+}
+
+function compareToRange(views, range) {
+  if (views < range.low) return "below the range";
+  if (views > range.high) return "above the range";
+  return "inside the range";
+}
+
+function showResults(idea, report) {
+  const form = $("results-form");
+  const results = idea.results || {};
+  const reminder = idea.reminder;
+  const due = new Date(reminder.dueAt).toLocaleDateString();
+  $("results-intro").textContent = reminder.hasEmail && reminder.emailOn
+    ? reminder.sentAt
+      ? "Once the video is out, add its views here. We sent you the 30-day reminder."
+      : `Once the video is out, add its views here. We will email you a reminder on ${due}.`
+    : `Once the video is out, come back to this page (bookmark it) and add its views, ideally around ${due}. This is how we learn whether the ranges are right.`;
+
+  form.elements.videoUrl.value = results.videoUrl || "";
+  for (const field of ["views7", "views30", "views90"]) form.elements[field].value = results[field] ?? "";
+
+  const summary = $("results-summary");
+  const range = predictedRange(report);
+  const lines = [];
+  if (results.video) {
+    const v = results.video;
+    lines.push(el("p", `"${v.title}" had ${v.views === null ? "hidden" : n(v.views)} views when we read it on ${new Date(v.readAt).toLocaleDateString()} (published ${formatAge(v.publishedAt)}).`));
+  }
+  if (results.videoError) lines.push(el("p", results.videoError, "error"));
+  const entered = [["views7", "7 days"], ["views30", "30 days"], ["views90", "90 days"]].filter(([f]) => results[f] != null);
+  if (entered.length && range) {
+    const list = el("ul");
+    for (const [field, label] of entered) {
+      list.append(el("li", `After ${label}: ${n(results[field])} views, ${compareToRange(results[field], range)} (${n(range.low)} to ${n(range.high)}, from ${range.basis}).`));
+    }
+    lines.push(list, el("p", "The range is what similar videos have collected so far, mostly over more than a year, so early numbers often sit below it. The 90-day number is the fairest comparison.", "hint"));
+  } else if (entered.length) {
+    lines.push(el("p", "Saved. The report had no view range to compare these numbers with.", "hint"));
+  }
+  summary.replaceChildren(...lines);
+  summary.hidden = lines.length === 0;
+}
+
+function setUpForms(idea) {
+  const id = idea.id;
+  $("feedback-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const updated = await postForm(event.target, `/api/ideas/${id}/feedback`, ["useful", "decision", "comment"], $("feedback-status"), $("feedback-submit"));
+    if (updated) showFeedback(updated);
+  });
+  $("results-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const updated = await postForm(event.target, `/api/ideas/${id}/results`, ["videoUrl", "views7", "views30", "views90"], $("results-status"), $("results-submit"));
+    if (updated) {
+      showResults(updated, updated.report);
+      $("results-status").textContent = "Results saved. Thank you!";
+    }
+  });
+}
+
 async function load() {
   const id = new URLSearchParams(window.location.search).get("id");
   try {
@@ -255,7 +374,11 @@ async function load() {
     showShelfLife(report.shelfLife, report.analysis);
     showCost(idea, report);
     showPackaging(report.analysis);
+    showFeedback(idea);
+    showResults(idea, report);
+    setUpForms(idea);
     $("report").hidden = false;
+    if (window.location.hash) $(window.location.hash.slice(1))?.scrollIntoView();
   } catch (error) {
     $("load-error").textContent = error.message || "Could not load the report.";
   } finally {

@@ -6,7 +6,7 @@ channels of the same size.
 
 ## Status
 
-Steps 1 to 6 of the build plan are done: a small Node.js server, an input
+Steps 1 to 7 of the build plan are done: a small Node.js server, an input
 form that saves each idea, a plain list of similar YouTube videos with
 their views, age and channel size, and a "Channels your size" view range, and Claude's shelf-life label, reframes,
 packaging suggestions and claims to verify. It works on phone and laptop.
@@ -34,7 +34,7 @@ computer and visit `http://<your-computer's-local-IP>:3000`.
 4. Channels your size ✅
 5. Claude reasoning ✅
 6. Report page ✅
-7. Results and reminders
+7. Results and reminders ✅
 8. Put it online
 
 ## Where ideas are saved
@@ -120,3 +120,21 @@ video:
 
 The report is saved with the idea, so the link shows the report as it was on
 the day of the check. Ids are random, so only people with the link can open it.
+
+## Results, feedback and reminders
+
+The end of each report has two forms:
+
+- **Was this useful?** "Was this report useful?" (yes/no), "Would it have
+  changed your decision?" (changed / confirmed / no effect) and an optional
+  comment.
+- **Your real results:** the published video's link (its current views are
+  read from YouTube, 1 quota unit) and the views after 7, 30 and 90 days.
+  Each number is shown as below, inside or above the report's range.
+
+Testers can leave an email on the form. 30 days after the report they get
+one reminder asking for their results, unless the 30-day views are already
+in. Reminders need an SMTP email service; set `SMTP_HOST`, `SMTP_PORT`,
+`SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM` and `PUBLIC_URL` (see `.env.example`).
+Without them nothing is sent, and the report page asks testers to bookmark
+it and come back. Email addresses are never sent to the report page.
