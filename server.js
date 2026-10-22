@@ -3,6 +3,7 @@ const express = require("express");
 const ideas = require("./lib/ideas");
 const youtube = require("./lib/youtube");
 const compare = require("./lib/compare");
+const claude = require("./lib/claude");
 
 // How many of the most relevant videos the "Similar videos" list shows.
 const SHOWN_SIMILAR = 12;
@@ -26,7 +27,14 @@ app.post("/api/ideas", async (req, res) => {
     return res.status(400).json({ errors });
   }
   const record = ideas.save(values);
-  const result = { id: record.id, createdAt: record.createdAt, channel: null, similarVideos: null, yourSize: null };
+  const result = {
+    id: record.id,
+    createdAt: record.createdAt,
+    channel: null,
+    similarVideos: null,
+    yourSize: null,
+    analysis: null,
+  };
 
   try {
     result.channel = await youtube.lookupChannel(record.channelUrl);
@@ -54,6 +62,21 @@ app.post("/api/ideas", async (req, res) => {
     if (!(error instanceof youtube.YouTubeError)) console.error(error);
     result.youtubeError =
       error instanceof youtube.YouTubeError ? error.message : "Could not reach YouTube. Try again in a moment.";
+  }
+
+  // Shelf life, reframes, packaging and fact checks from Claude. Runs even if
+  // YouTube failed: the wording and the tester's answers still say something.
+  try {
+    result.analysis = await claude.analyzeIdea(
+      { ...record, channelSubscribers: result.channel?.subscribers ?? null },
+      result.similarVideos || [],
+      result.yourSize,
+    );
+    ideas.update(record.id, { analysis: result.analysis, analysisAt: new Date().toISOString() });
+  } catch (error) {
+    if (!(error instanceof claude.ClaudeError)) console.error(error);
+    result.claudeError =
+      error instanceof claude.ClaudeError ? error.message : "Could not reach Claude. Try again in a moment.";
   }
 
   res.status(201).json(result);

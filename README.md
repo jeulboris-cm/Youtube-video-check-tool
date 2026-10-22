@@ -6,9 +6,10 @@ channels of the same size.
 
 ## Status
 
-Steps 1 to 4 of the build plan are done: a small Node.js server, an input
+Steps 1 to 5 of the build plan are done: a small Node.js server, an input
 form that saves each idea, a plain list of similar YouTube videos with
-their views, age and channel size, and a "Channels your size" view range. It works on phone and laptop.
+their views, age and channel size, and a "Channels your size" view range, and Claude's shelf-life label, reframes,
+packaging suggestions and claims to verify. It works on phone and laptop.
 
 ## Run it locally
 
@@ -19,8 +20,8 @@ npm install
 npm start
 ```
 
-Set your YouTube Data API key first (copy `.env.example` to `.env`, or set
-`YOUTUBE_API_KEY` in your environment). Then open http://localhost:3000 in your browser.
+Set your YouTube Data API key and Claude API key first (copy `.env.example` to `.env`, or set
+`YOUTUBE_API_KEY` and `ANTHROPIC_API_KEY` in your environment). Then open http://localhost:3000 in your browser.
 
 To open it on your phone, connect the phone to the same Wi-Fi as your
 computer and visit `http://<your-computer's-local-IP>:3000`.
@@ -31,7 +32,7 @@ computer and visit `http://<your-computer's-local-IP>:3000`.
 2. Input form ✅
 3. YouTube data ✅
 4. Channels your size ✅
-5. Claude reasoning
+5. Claude reasoning ✅
 6. Report page
 7. Results and reminders
 8. Put it online
@@ -82,3 +83,19 @@ tester's subscriber count, with the list of videos it uses. The estimate
 only uses channels from a tenth of the tester's size up to 50 times it, and
 never channels under 100 subscribers, whose numbers swing too much. It also
 needs at least 5 such videos.
+
+## Claude analysis
+
+After the YouTube lookup, the tool sends the idea and the similar videos to
+Claude (`claude-opus-5-5`, in `lib/claude.js`) and gets back:
+
+- a shelf-life label (short, medium or long) with a one-line reason and the
+  signals it rests on (wording, older similar videos, the tester's news answer),
+- one or two reframes around the mechanism when the label is short or medium,
+- two or three packaging directions with an example title and a reason,
+- claims in the idea to verify before publishing.
+
+Search-trend data is not connected, so Claude is told not to guess it. Each
+report costs a few cents on the Claude API account. `CLAUDE_EFFORT` (low,
+medium, high) trades thinking depth against cost; the default is medium.
+If no key is set, the rest of the report still works and the page says so.

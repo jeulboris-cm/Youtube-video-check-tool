@@ -10,6 +10,8 @@ const yourSizeBand = document.getElementById("your-size-band");
 const yourSizeRange = document.getElementById("your-size-range");
 const yourSizeNote = document.getElementById("your-size-note");
 const yourSizeVideos = document.getElementById("your-size-videos");
+const analysis = document.getElementById("analysis");
+const claudeError = document.getElementById("claude-error");
 const estimate = document.getElementById("estimate");
 const estimateRange = document.getElementById("estimate-range");
 const estimateCount = document.getElementById("estimate-count");
@@ -64,6 +66,62 @@ function showResults(result) {
   }
   renderVideos(videoList, videos);
   showYourSize(result.yourSize);
+  showAnalysis(result.analysis);
+  claudeError.textContent = result.claudeError || "";
+}
+
+const SHELF_LIFE = { short: "Short (weeks)", medium: "Medium (months)", long: "Long (years)" };
+const SIGNAL_NAMES = {
+  wording: "Wording",
+  older_competitors: "Older similar videos",
+  tester_answer: "Your answer about news",
+  search_interest: "Search interest",
+};
+const POINTS_TO = { short: "points to short", long: "points to long", unclear: "unclear" };
+
+// Fills a list with one item per entry; build(entry) returns the item's nodes.
+function fillList(list, entries, build) {
+  list.replaceChildren(
+    ...entries.map((entry) => {
+      const item = document.createElement("li");
+      item.append(...build(entry));
+      return item;
+    }),
+  );
+}
+
+function bold(text) {
+  const b = document.createElement("strong");
+  b.textContent = text;
+  return b;
+}
+
+function showAnalysis(data) {
+  analysis.hidden = !data;
+  if (!data) return;
+
+  const tag = document.createElement("span");
+  tag.className = "label-tag";
+  tag.textContent = SHELF_LIFE[data.shelfLife.label];
+  document.getElementById("shelf-life").replaceChildren(tag, ` ${data.shelfLife.reason}`);
+  fillList(document.getElementById("shelf-signals"), data.shelfLife.signals, (s) => [
+    bold(`${SIGNAL_NAMES[s.signal] || s.signal} (${POINTS_TO[s.pointsTo]}): `),
+    s.detail,
+  ]);
+
+  document.getElementById("reframes-block").hidden = data.reframes.length === 0;
+  fillList(document.getElementById("reframes"), data.reframes, (r) => [r]);
+
+  fillList(document.getElementById("packaging"), data.packaging, (p) => [
+    bold(p.angle),
+    document.createElement("br"),
+    `Example title: "${p.exampleTitle}"`,
+    document.createElement("br"),
+    p.reason,
+  ]);
+
+  const checks = data.factChecks.length ? data.factChecks : [{ claim: "No specific claims to check were found.", why: "" }];
+  fillList(document.getElementById("fact-checks"), checks, (f) => [bold(f.claim), f.why ? ` ${f.why}` : ""]);
 }
 
 function renderVideos(list, videos) {
@@ -153,7 +211,7 @@ form.addEventListener("submit", async (event) => {
   const data = Object.fromEntries(new FormData(form));
 
   submitButton.disabled = true;
-  formStatus.textContent = "Saving and searching YouTube…";
+  formStatus.textContent = "Saving, searching YouTube and asking Claude… this can take up to a minute.";
   try {
     const response = await fetch("/api/ideas", {
       method: "POST",
