@@ -309,38 +309,73 @@ function compareToRange(views, range) {
   return "inside the range";
 }
 
+const CHECKPOINT_DAYS = [7, 30, 90];
+
+// The tester's own number for a checkpoint, or else the automatic reading.
+function viewsAt(results, day) {
+  const typed = results[`views${day}`];
+  if (typed != null) return { views: typed, source: "your number" };
+  const auto = results.auto?.[day];
+  return auto ? { views: auto.views, source: "read from YouTube" } : null;
+}
+
 function showResults(idea, report) {
   const form = $("results-form");
   const results = idea.results || {};
   const reminder = idea.reminder;
   const due = new Date(reminder.dueAt).toLocaleDateString();
-  $("results-intro").textContent = reminder.hasEmail && reminder.emailOn
-    ? reminder.sentAt
-      ? "Once the video is out, add its views here. We sent you the 30-day reminder."
-      : `Once the video is out, add its views here. We will email you a reminder on ${due}.`
-    : `Once the video is out, come back to this page (bookmark it) and add its views, ideally around ${due}. This is how we learn whether the ranges are right.`;
+  const date = (iso) => new Date(iso).toLocaleDateString();
+
+  $("results-intro").textContent = results.notMade
+    ? "You said you decided not to make this video. Thank you for telling us: that counts as a result too."
+    : idea.tracking
+      ? "We are following your video: its views are read from YouTube automatically at 7, 30 and 90 days after publishing. Nothing else to do."
+      : reminder.hasEmail && reminder.emailOn
+        ? reminder.sentAt
+          ? "Once the video is out, paste its link here. We sent you the 30-day reminder."
+          : `Once the video is out, paste its link here and we will follow its views automatically. If we have no link by ${due}, we will email you a reminder.`
+        : "Once the video is out, come back to this page (bookmark it) and paste the video's link. We then follow its views automatically.";
 
   form.elements.videoUrl.value = results.videoUrl || "";
-  for (const field of ["views7", "views30", "views90"]) form.elements[field].value = results[field] ?? "";
+  for (const day of CHECKPOINT_DAYS) form.elements[`views${day}`].value = results[`views${day}`] ?? "";
+  form.elements.notMade.checked = Boolean(results.notMade);
 
-  const summary = $("results-summary");
-  const range = predictedRange(report);
   const lines = [];
   if (results.video) {
     const v = results.video;
-    lines.push(el("p", `"${v.title}" had ${v.views === null ? "hidden" : n(v.views)} views when we read it on ${new Date(v.readAt).toLocaleDateString()} (published ${formatAge(v.publishedAt)}).`));
+    lines.push(el("p", `"${v.title}" was published ${formatAge(v.publishedAt)} and had ${v.views === null ? "hidden" : n(v.views)} views when we read it on ${date(v.readAt)}.`));
   }
   if (results.videoError) lines.push(el("p", results.videoError, "error"));
-  const entered = [["views7", "7 days"], ["views30", "30 days"], ["views90", "90 days"]].filter(([f]) => results[f] != null);
-  if (entered.length && range) {
+
+  // The automatic readings: done, coming, or missed (the link came too late).
+  if (idea.tracking) {
     const list = el("ul");
-    for (const [field, label] of entered) {
-      list.append(el("li", `After ${label}: ${n(results[field])} views, ${compareToRange(results[field], range)} (${n(range.low)} to ${n(range.high)}, from ${range.basis}).`));
+    for (const point of idea.tracking) {
+      const typed = results[`views${point.day}`] != null;
+      let text;
+      if (point.reading) text = `${n(point.reading.views)} views (read on ${date(point.reading.readAt)})`;
+      else if (Date.now() < Date.parse(point.at)) text = `will be read on ${date(point.at)}`;
+      else if (typed) text = "you typed this one yourself";
+      else if (Date.now() - Date.parse(point.at) < 3 * 86400000) text = "being read in the next day";
+      else text = "the link came after this date, so type it from YouTube Studio if you can";
+      list.append(el("li", `Day ${point.day}: ${text}`));
     }
-    lines.push(list, el("p", "The range is what similar videos have collected so far, mostly over more than a year, so early numbers often sit below it. The 90-day number is the fairest comparison.", "hint"));
-  } else if (entered.length) {
+    lines.push(el("p", "Automatic readings:"), list);
+  }
+
+  const range = predictedRange(report);
+  const known = CHECKPOINT_DAYS.map((day) => [day, viewsAt(results, day)]).filter(([, v]) => v);
+  if (known.length && range) {
+    const list = el("ul");
+    for (const [day, v] of known) {
+      list.append(el("li", `After ${day} days: ${n(v.views)} views (${v.source}), ${compareToRange(v.views, range)} (${n(range.low)} to ${n(range.high)}, from ${range.basis}).`));
+    }
+    lines.push(el("p", "Compared with the report's range:"), list, el("p", "The range is what similar videos have collected so far, mostly over more than a year, so early numbers often sit below it. The 90-day number is the fairest comparison.", "hint"));
+  } else if (known.length) {
     lines.push(el("p", "Saved. The report had no view range to compare these numbers with.", "hint"));
   }
+
+  const summary = $("results-summary");
   summary.replaceChildren(...lines);
   summary.hidden = lines.length === 0;
 }
@@ -354,7 +389,7 @@ function setUpForms(idea) {
   });
   $("results-form").addEventListener("submit", async (event) => {
     event.preventDefault();
-    const updated = await postForm(event.target, `/api/ideas/${id}/results`, ["videoUrl", "views7", "views30", "views90"], $("results-status"), $("results-submit"));
+    const updated = await postForm(event.target, `/api/ideas/${id}/results`, ["videoUrl", "views7", "views30", "views90", "notMade"], $("results-status"), $("results-submit"));
     if (updated) {
       showResults(updated, updated.report);
       $("results-status").textContent = "Results saved. Thank you!";
@@ -385,6 +420,7 @@ async function load() {
     if (window.location.hash) $(window.location.hash.slice(1))?.scrollIntoView();
   } catch (error) {
     $("load-error").textContent = error.message || "Could not load the report.";
+    $("lost-link").hidden = false;
   } finally {
     $("loading").hidden = true;
   }

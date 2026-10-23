@@ -4,6 +4,8 @@ const ideas = require("./lib/ideas");
 const youtube = require("./lib/youtube");
 const reminders = require("./lib/reminders");
 const admin = require("./lib/admin");
+const tracking = require("./lib/tracking");
+const { createLimiter } = require("./lib/ratelimit");
 const { buildReport } = require("./lib/report");
 
 const app = express();
@@ -54,6 +56,7 @@ function publicView(record) {
       dueAt: reminders.dueAt(record),
       sentAt: record.reminderSentAt || null,
     },
+    tracking: tracking.schedule(record.results),
   };
 }
 
@@ -74,19 +77,29 @@ app.post("/api/ideas/:id/results", async (req, res) => {
   const { errors, values } = ideas.validateResults(req.body || {});
   if (Object.keys(errors).length > 0) return res.status(400).json({ errors });
 
-  const results = { ...values, video: record.results?.video || null, updatedAt: new Date().toISOString() };
+  // Keep what we already know about the same video if YouTube cannot be
+  // reached right now.
+  const sameVideo = values.videoId && record.results?.videoId === values.videoId;
+  let video = sameVideo ? record.results.video : null;
+  let videoError;
   if (values.videoId) {
     try {
-      results.video = await youtube.videoStats(values.videoId);
-      if (!results.video) return res.status(400).json({ errors: { videoUrl: "No public YouTube video found at that link." } });
+      video = await youtube.videoStats(values.videoId);
+      if (!video) return res.status(400).json({ errors: { videoUrl: "No public YouTube video found at that link." } });
     } catch (error) {
       if (!(error instanceof youtube.YouTubeError)) console.error(error);
-      results.videoError = "Could not read the current views from YouTube. Your numbers were still saved.";
+      videoError = "Could not read the current views from YouTube. Your numbers were still saved.";
     }
-  } else {
-    results.video = null;
   }
-  res.json(publicView(await ideas.update(record.id, { results })));
+  const updated = await ideas.modify(record.id, (idea) => {
+    // The automatic 7/30/90-day readings belong to one video; a new link
+    // starts them again.
+    const keepAuto = values.videoId && idea.results?.videoId === values.videoId;
+    const results = { ...values, video, auto: keepAuto ? idea.results.auto || {} : {}, updatedAt: new Date().toISOString() };
+    if (videoError) results.videoError = videoError;
+    return { ...idea, results };
+  });
+  res.json(publicView(updated));
 });
 
 // Saves the answers to "Was this useful?" and "Would it have changed your
@@ -100,6 +113,35 @@ app.post("/api/ideas/:id/feedback", async (req, res) => {
   res.json(publicView(await ideas.update(record.id, { feedback })));
 });
 
+// "Lost your link?": emails the links of every report checked with an email
+// address, to that address only. The answer is the same whether or not the
+// address is known, so nobody can find out who used the tool. Limited to 5
+// requests an hour per visitor and 3 per address, so it cannot flood inboxes.
+const findLimitPerVisitor = createLimiter({ max: 5, windowMs: 60 * 60 * 1000 });
+const findLimitPerEmail = createLimiter({ max: 3, windowMs: 60 * 60 * 1000 });
+app.post("/api/find-reports", async (req, res) => {
+  if (!reminders.isConfigured()) {
+    return res.status(503).json({ error: "Email is not set up yet. Please contact the person who invited you to Idea Check." });
+  }
+  const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
+    return res.status(400).json({ errors: { email: "Enter the email address you gave on the form." } });
+  }
+  if (findLimitPerVisitor(req.ip) || findLimitPerEmail(email)) {
+    return res.status(429).json({ error: "Too many requests. Please try again in an hour." });
+  }
+  const list = (await ideas.readAll())
+    .filter((idea) => idea.email && idea.email.toLowerCase() === email)
+    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  // Answer before sending, so a known address does not answer more slowly
+  // than an unknown one.
+  res.json({ message: "If we have reports for that address, we have just emailed the links to it. Check your spam folder too." });
+  if (list.length) {
+    // Never log the address itself.
+    reminders.sendReportLinks(email, list).catch((error) => console.error(`Report links email failed: ${error.message}`));
+  }
+});
+
 // The owner's private overview of every check (public/admin.html). Needs
 // the ADMIN_PASSWORD setting; without it this answers "Not found".
 app.get("/api/admin/ideas", async (req, res) => {
@@ -109,14 +151,23 @@ app.get("/api/admin/ideas", async (req, res) => {
   res.json(admin.overview(await ideas.readAll()));
 });
 
-// Sends the reminder emails that are due. A free scheduler (the GitHub
+// The daily jobs: read the views of published videos at 7, 30 and 90 days,
+// and send the reminder emails that are due. A free scheduler (the GitHub
 // Actions workflow in .github/workflows/reminders.yml) calls this once a
 // day, which also wakes the app on hosts that put it to sleep. It needs the
 // CRON_SECRET, so strangers cannot trigger it.
 app.post("/api/cron/reminders", async (req, res) => {
   const secret = process.env.CRON_SECRET;
   if (!secret || req.get("authorization") !== `Bearer ${secret}`) return res.status(401).json({ error: "Not allowed." });
-  res.json(await reminders.sendDueReminders());
+  let views;
+  try {
+    views = await tracking.readDueViews();
+  } catch (error) {
+    // A YouTube problem must not stop the reminders.
+    console.error(error);
+    views = { read: 0, error: error.message };
+  }
+  res.json({ views, reminders: await reminders.sendDueReminders() });
 });
 
 // Any error not handled above: log it and answer with a plain message.

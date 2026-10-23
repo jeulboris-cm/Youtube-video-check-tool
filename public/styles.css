@@ -808,3 +808,25 @@ summary {
 .check .idea {
   color: var(--muted);
 }
+
+.check-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0 0;
+  font-weight: 500;
+}
+
+.check-option input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+#results-submit {
+  margin-top: 18px;
+}
+
+.login-card h1 + .hint {
+  margin-bottom: 16px;
+}

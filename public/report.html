@@ -21,6 +21,7 @@
   <main class="container report">
     <p id="loading" role="status">Loading your report…</p>
     <p class="error" id="load-error"></p>
+    <p id="lost-link" hidden><a href="/find.html">Lost your report link? Get it by email.</a></p>
 
     <div id="report" hidden>
       <header class="idea-summary">
@@ -139,7 +140,7 @@
           <div class="field">
             <label for="videoUrl">Link to the published video</label>
             <input id="videoUrl" name="videoUrl" type="url" inputmode="url" placeholder="https://www.youtube.com/watch?v=…">
-            <p class="hint">Optional. With a link, we read the video's current views from YouTube for you.</p>
+            <p class="hint">Paste it as soon as the video is out. We then read its views from YouTube automatically.</p>
             <p class="error" id="videoUrl-error"></p>
           </div>
           <span class="label">Views after…</span>
@@ -160,7 +161,9 @@
               <p class="error" id="views90-error"></p>
             </div>
           </div>
-          <p class="hint">YouTube Studio shows views by day under Analytics. Fill in what you have; you can come back later for the rest.</p>
+          <p class="hint">With the video's link, you can leave these empty: we read the views at 7, 30 and 90 days after publishing by ourselves. If you type numbers from YouTube Studio, yours are used instead.</p>
+          <label class="check-option"><input type="checkbox" name="notMade" id="notMade"> I decided not to make this video</label>
+          <p class="error" id="notMade-error"></p>
           <button type="submit" class="secondary" id="results-submit">Save results</button>
           <p class="form-status" id="results-status" role="status"></p>
         </form>

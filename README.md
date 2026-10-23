@@ -134,13 +134,19 @@ The end of each report has two forms:
 - **Was this useful?** "Was this report useful?" (yes/no), "Would it have
   changed your decision?" (changed / confirmed / no effect) and an optional
   comment.
-- **Your real results:** the published video's link (its current views are
-  read from YouTube, 1 quota unit) and the views after 7, 30 and 90 days.
-  Each number is shown as below, inside or above the report's range.
+- **Your real results:** the published video's link, the views after 7, 30
+  and 90 days, and "I decided not to make this video". Once the link is in,
+  the daily job reads the video's views from YouTube by itself at 7, 30 and
+  90 days after publishing (`lib/tracking.js`, 1 quota unit per 50 videos);
+  numbers the tester types win over the automatic ones. Each number is shown
+  as below, inside or above the report's range.
 
-Testers can leave an email on the form. 30 days after the report they get
-one reminder asking for their results, unless the 30-day views are already
-in. Reminders need an SMTP email service; set `SMTP_HOST`, `SMTP_PORT`,
+Testers can leave an email on the form. They get their report's link right
+away, and 30 days after the report one reminder asking for their video's
+link, unless the link or the 30-day views are already in. "Lost your report
+link?" (`/find.html`) emails all of an address's report links to that
+address only, answers the same whether or not the address is known, and is
+limited to 5 requests an hour per visitor and 3 per address. Reminders need an SMTP email service; set `SMTP_HOST`, `SMTP_PORT`,
 `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM` and `PUBLIC_URL` (see `.env.example`).
 Without them nothing is sent, and the report page asks testers to bookmark
 it and come back. Email addresses are never sent to the report page.
