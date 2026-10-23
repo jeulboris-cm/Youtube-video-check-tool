@@ -99,3 +99,15 @@ days; it emails you first, and one click turns them back on.
 
 Nothing on the site links to this page and it needs the password, so testers
 never see it. Five wrong passwords lock that visitor out for 15 minutes.
+
+## 7. Turning on Claude (the AI advice)
+
+1. Create a key at https://platform.claude.com (API Keys → Create Key) after
+   buying credits under Settings → Billing. Set a monthly limit under
+   Settings → Limits.
+2. In Render: `idea-check` → Environment → Edit → + Add:
+   `ANTHROPIC_API_KEY` = your key. Optionally `CLAUDE_MODEL` =
+   `claude-opus-5-5` (best), `claude-sonnet-5-5` or `claude-haiku-5-5`
+   (cheapest). Save; the app restarts.
+3. New reports then get Claude's shelf life, reframes, packaging and claims
+   to check. The owner page shows an estimate of the spend so far.

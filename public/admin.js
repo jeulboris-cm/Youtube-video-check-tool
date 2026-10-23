@@ -47,6 +47,9 @@ function showSummary(s) {
     tile(s.tracked, "videos followed automatically"),
     tile(s.notMade, "decided not to make it"),
     tile(s.withEmail, "left an email"),
+    tile(s.claude.reports ? money.format(s.claude.dollars) : "$0", s.claude.reports
+      ? `Claude spend (estimate, ${s.claude.reports} reports, about ${money.format(s.claude.perReport)} each)`
+      : "Claude spend (none yet)"),
   );
   const line = (label, t) => {
     const total = t.inside + t.below + t.above;
