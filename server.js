@@ -3,10 +3,14 @@ const express = require("express");
 const ideas = require("./lib/ideas");
 const youtube = require("./lib/youtube");
 const reminders = require("./lib/reminders");
+const admin = require("./lib/admin");
 const { buildReport } = require("./lib/report");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+// Hosts like Render sit in front of the app; this makes req.ip the visitor's
+// address, which the admin password lockout relies on.
+app.set("trust proxy", 1);
 
 app.use(express.json({ limit: "20kb" }));
 app.use(express.static(path.join(__dirname, "public")));
@@ -28,6 +32,9 @@ app.post("/api/ideas", async (req, res) => {
     // Keep a snapshot of the report as it was that day, as the spec asks.
     const report = await buildReport(record);
     await ideas.update(record.id, { channelSubscribers: report.channel?.subscribers ?? null, report });
+    // Email the report's link if the tester left an address. Not awaited:
+    // the tester does not need to wait for it, and it never throws.
+    reminders.sendReportLink(record);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Your idea was saved, but the report could not be built. Try again." });
@@ -91,6 +98,15 @@ app.post("/api/ideas/:id/feedback", async (req, res) => {
   if (Object.keys(errors).length > 0) return res.status(400).json({ errors });
   const feedback = { ...values, at: new Date().toISOString() };
   res.json(publicView(await ideas.update(record.id, { feedback })));
+});
+
+// The owner's private overview of every check (public/admin.html). Needs
+// the ADMIN_PASSWORD setting; without it this answers "Not found".
+app.get("/api/admin/ideas", async (req, res) => {
+  const denied = admin.checkAccess(req);
+  if (denied) return res.status(denied[0]).json({ error: denied[1] });
+  res.set("Cache-Control", "no-store");
+  res.json(admin.overview(await ideas.readAll()));
 });
 
 // Sends the reminder emails that are due. A free scheduler (the GitHub

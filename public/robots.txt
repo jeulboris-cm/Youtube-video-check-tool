@@ -1,0 +1,5 @@
+# Reports are private links and the admin page is for the owner only.
+User-agent: *
+Disallow: /report.html
+Disallow: /admin.html
+Disallow: /api/

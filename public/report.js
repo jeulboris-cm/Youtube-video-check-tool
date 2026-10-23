@@ -75,6 +75,10 @@ function showIdea(idea, report) {
   if (idea.productionDays) parts.push(`${idea.productionDays} days of work`);
   if (idea.newsTied) parts.push(NEWS_TIED[idea.newsTied]);
   $("idea-meta").textContent = parts.join(" · ");
+  $("link-note").textContent =
+    idea.reminder.hasEmail && idea.reminder.emailOn
+      ? "We have emailed you the link to this report, so you can come back to it any time."
+      : "Bookmark this page: its address is your private link to this report.";
   $("youtube-error").textContent = report.youtubeError || "";
   $("claude-error").textContent = report.claudeError || "";
 }

@@ -144,3 +144,15 @@ in. Reminders need an SMTP email service; set `SMTP_HOST`, `SMTP_PORT`,
 `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM` and `PUBLIC_URL` (see `.env.example`).
 Without them nothing is sent, and the report page asks testers to bookmark
 it and come back. Email addresses are never sent to the report page.
+
+## Owner page
+
+`/admin.html` is a private page for the owner: every check, the testers'
+feedback, their real views against the predicted range, headline numbers
+and a CSV download. Nothing on the site links to it, search engines are
+asked not to list it, and it needs the `ADMIN_PASSWORD` setting; without
+that setting it is switched off. Five wrong passwords lock a visitor out for
+15 minutes.
+
+Testers who leave an email also get their report's link by email right
+after the check, so they never lose it.

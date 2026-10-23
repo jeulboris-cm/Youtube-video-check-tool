@@ -88,3 +88,14 @@ days; it emails you first, and one click turns them back on.
 - **YouTube quota:** about 25–45 reports a day (see the README).
 - **Speed:** the first visitor after 15 quiet minutes waits about a minute.
 - **Render hours:** 750 a month is enough for one app that sleeps when idle.
+
+## 6. Your private owner page
+
+1. In Render, open the `idea-check` service → **Environment** → **Edit** →
+   **+ Add**. Name: `ADMIN_PASSWORD`. Value: a long password only you know
+   (for example four random words and a number). Click **Save**; the app
+   restarts in a minute or two.
+2. Open `https://idea-check.onrender.com/admin.html` and enter that password.
+
+Nothing on the site links to this page and it needs the password, so testers
+never see it. Five wrong passwords lock that visitor out for 15 minutes.
