@@ -20,11 +20,12 @@ function showErrors(errors) {
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const data = Object.fromEntries(new FormData(form));
+  // The page's language decides the YouTube search language and the emails.
+  const data = { ...Object.fromEntries(new FormData(form)), language: I18N.lang };
 
   submitButton.disabled = true;
   submitButton.classList.add("loading");
-  formStatus.textContent = "Saving and building your report… this can take up to a minute.";
+  formStatus.textContent = I18N.t("common.saving");
   try {
     const response = await fetch("/api/ideas", {
       method: "POST",
@@ -34,12 +35,13 @@ form.addEventListener("submit", async (event) => {
     const body = await response.json();
     if (!response.ok) {
       showErrors(body.errors || {});
-      formStatus.textContent = body.error || "Please fix the highlighted fields.";
+      formStatus.textContent = body.error || I18N.t("common.fix_fields");
       return;
     }
+    // The report page shows progress while the report is built.
     window.location.href = `/report.html?id=${encodeURIComponent(body.id)}`;
   } catch {
-    formStatus.textContent = "Could not save. Check your connection and try again.";
+    formStatus.textContent = I18N.t("common.no_connection");
   } finally {
     submitButton.disabled = false;
     submitButton.classList.remove("loading");

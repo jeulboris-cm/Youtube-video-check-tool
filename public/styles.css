@@ -830,3 +830,127 @@ summary {
 .login-card h1 + .hint {
   margin-bottom: 16px;
 }
+
+/* ---------- Language switch, progress ---------- */
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.lang-switch {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+}
+
+.lang-switch button {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.lang-switch button[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.hint.center {
+  text-align: center;
+}
+
+.progress-card {
+  max-width: 520px;
+  margin: 32px auto;
+  padding: 24px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.progress-card h1 {
+  font-size: 1.5rem;
+}
+
+.progress-steps {
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.progress-steps li {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  padding: 7px 0;
+}
+
+.progress-steps .todo {
+  color: var(--muted);
+}
+
+.progress-steps .current {
+  font-weight: 600;
+}
+
+.step-mark {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--surface);
+  text-align: center;
+  line-height: 22px;
+  font-size: 0.8rem;
+}
+
+.step-mark.done {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.step-mark.current {
+  background: var(--accent);
+  color: var(--accent-text);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .step-mark.current {
+    animation: none;
+  }
+}
+
+.brand,
+.header-link {
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  /* Room for the link and the EN | FR switch: the red icon still leads home. */
+  .header-actions {
+    gap: 10px;
+  }
+
+  .site-header:has(.header-link) .brand-name {
+    display: none;
+  }
+
+  .header-link {
+    font-size: 0.9rem;
+  }
+}

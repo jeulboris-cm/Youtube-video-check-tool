@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-i18n-title="home.title">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,62 +13,63 @@
       <span class="brand-mark" aria-hidden="true">
         <svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </span>
-      Idea Check
+      <span class="brand-name">Idea Check</span>
     </a>
+    <div class="header-actions"></div>
   </header>
 
   <main class="container">
     <section class="hero">
-      <p class="eyebrow">For creators of high-effort videos</p>
-      <h1>Is this video worth making?</h1>
-      <p class="tagline">
+      <p class="eyebrow" data-i18n="home.eyebrow">For creators of high-effort videos</p>
+      <h1 data-i18n="home.h1">Is this video worth making?</h1>
+      <p class="tagline" data-i18n="home.tagline">
         Before you spend a month on it, see what similar videos from channels
         your size actually got, how long the idea will stay relevant, and how
         to package it.
       </p>
       <ul class="promises">
-        <li>Real views from similar videos</li>
-        <li>Channels your size</li>
-        <li>Shelf life</li>
-        <li>Cost per 1,000 views</li>
+        <li data-i18n="home.promise1">Real views from similar videos</li>
+        <li data-i18n="home.promise2">Your own track record</li>
+        <li data-i18n="home.promise3">Shelf life</li>
+        <li data-i18n="home.promise4">Cost per 1,000 views</li>
       </ul>
     </section>
 
     <form id="idea-form" class="card form-card" novalidate>
       <div class="form-group">
-        <h2 class="group-title"><span class="step">1</span> The idea</h2>
+        <h2 class="group-title"><span class="step">1</span> <span data-i18n="form.group_idea">The idea</span></h2>
 
         <div class="field">
-          <label for="idea">Your idea in one or two sentences</label>
+          <label for="idea" data-i18n="form.idea">Your idea in one or two sentences</label>
           <textarea id="idea" name="idea" rows="3" maxlength="1000" required
-            placeholder="How MTN ran its mobile network across Africa"></textarea>
-          <p class="hint">Name the specific people, companies or places involved (for example "MTN", not "a telecom company"). This helps find videos that are truly similar.</p>
+            data-i18n-placeholder="form.idea_ph" placeholder="How MTN ran its mobile network across Africa"></textarea>
+          <p class="hint" data-i18n="form.idea_hint">Name the specific people, companies or places involved (for example "MTN", not "a telecom company"). This helps find videos that are truly similar.</p>
           <p class="error" id="idea-error"></p>
         </div>
 
         <div class="field">
-          <label for="workingTitle">Working title</label>
+          <label for="workingTitle" data-i18n="form.title">Working title</label>
           <input id="workingTitle" name="workingTitle" type="text" maxlength="200" required
-            placeholder="The most hated telecom company in Africa">
+            data-i18n-placeholder="form.title_ph" placeholder="The most hated telecom company in Africa">
           <p class="error" id="workingTitle-error"></p>
         </div>
 
         <div class="field">
-          <label for="channelUrl">Your channel link</label>
+          <label for="channelUrl" data-i18n="form.channel">Your channel link</label>
           <input id="channelUrl" name="channelUrl" type="url" inputmode="url" autocomplete="url" required
             placeholder="https://www.youtube.com/@yourchannel">
-          <p class="hint">Used to read your subscriber count. Links like youtube.com/@name work best.</p>
+          <p class="hint" data-i18n="form.channel_hint">Used to read your subscriber count and your recent videos' views. Links like youtube.com/@name work best.</p>
           <p class="error" id="channelUrl-error"></p>
         </div>
       </div>
 
       <div class="form-group">
-        <h2 class="group-title"><span class="step">2</span> Production details <span class="optional-tag">Optional</span></h2>
-        <p class="group-hint">These make the report more useful, especially the cost.</p>
+        <h2 class="group-title"><span class="step">2</span> <span data-i18n="form.group_details">Production details</span> <span class="optional-tag" data-i18n="common.optional">Optional</span></h2>
+        <p class="group-hint" data-i18n="form.details_hint">These make the report more useful, especially the cost.</p>
 
         <div class="row three">
           <div class="field wide">
-            <label for="costUsd">Production cost</label>
+            <label for="costUsd" data-i18n="form.cost">Production cost</label>
             <div class="input-wrap prefix" data-prefix="$">
               <input id="costUsd" name="costUsd" type="number" inputmode="decimal" min="0" step="any" placeholder="350">
             </div>
@@ -76,16 +77,16 @@
           </div>
 
           <div class="field">
-            <label for="lengthMinutes">Planned length</label>
-            <div class="input-wrap suffix" data-suffix="min">
+            <label for="lengthMinutes" data-i18n="form.length">Planned length</label>
+            <div class="input-wrap suffix" data-suffix="min" data-i18n-suffix="form.suffix_min">
               <input id="lengthMinutes" name="lengthMinutes" type="number" inputmode="decimal" min="0" step="any" placeholder="18">
             </div>
             <p class="error" id="lengthMinutes-error"></p>
           </div>
 
           <div class="field">
-            <label for="productionDays">Production time</label>
-            <div class="input-wrap suffix" data-suffix="days">
+            <label for="productionDays" data-i18n="form.days">Production time</label>
+            <div class="input-wrap suffix" data-suffix="days" data-i18n-suffix="form.suffix_days">
               <input id="productionDays" name="productionDays" type="number" inputmode="numeric" min="0" step="1" placeholder="30">
             </div>
             <p class="error" id="productionDays-error"></p>
@@ -93,40 +94,42 @@
         </div>
 
         <div class="field">
-          <span class="label" id="newsTied-label">Is the idea tied to a recent news event?</span>
+          <span class="label" id="newsTied-label" data-i18n="form.news">Is the idea tied to a recent news event?</span>
           <div class="segmented" role="radiogroup" aria-labelledby="newsTied-label">
-            <label><input type="radio" name="newsTied" value="yes"><span>Yes</span></label>
-            <label><input type="radio" name="newsTied" value="no"><span>No</span></label>
-            <label><input type="radio" name="newsTied" value="not_sure"><span>Not sure</span></label>
+            <label><input type="radio" name="newsTied" value="yes"><span data-i18n="common.yes">Yes</span></label>
+            <label><input type="radio" name="newsTied" value="no"><span data-i18n="common.no">No</span></label>
+            <label><input type="radio" name="newsTied" value="not_sure"><span data-i18n="common.not_sure">Not sure</span></label>
           </div>
           <p class="error" id="newsTied-error"></p>
         </div>
       </div>
 
       <div class="form-group">
-        <h2 class="group-title"><span class="step">3</span> Reminder <span class="optional-tag">Optional</span></h2>
+        <h2 class="group-title"><span class="step">3</span> <span data-i18n="form.group_reminder">Reminder</span> <span class="optional-tag" data-i18n="common.optional">Optional</span></h2>
         <div class="field">
-          <label for="email">Email for a 30-day reminder</label>
+          <label for="email" data-i18n="form.email">Email for your report link and a 30-day reminder</label>
           <input id="email" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254"
             placeholder="you@example.com">
-          <p class="hint">We email you once, 30 days after the report, to ask how many views the video got. That is how we learn whether the tool works. Nothing else.</p>
+          <p class="hint" data-i18n="form.email_hint">We email you the link to your report right away, and once, 30 days later, ask for your video's link. That is how we learn whether the tool works. Nothing else.</p>
           <p class="error" id="email-error"></p>
         </div>
       </div>
 
       <button type="submit" id="submit" class="primary">
         <span class="spinner" aria-hidden="true"></span>
-        <span class="button-label">Check this idea</span>
+        <span class="button-label" data-i18n="form.submit">Check this idea</span>
       </button>
       <p class="form-status" id="form-status" role="status"></p>
+      <p class="hint center" data-i18n="form.wake_note">The first check after a quiet spell can take an extra minute while the tool wakes up.</p>
 
       <p class="privacy">
         <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3M6 11h12v9H6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-        Your idea is private. It is never shown to other users.
+        <span data-i18n="form.privacy">Your idea is private. It is never shown to other users.</span>
       </p>
-      <p class="privacy"><a href="/find.html">Lost your report link?</a></p>
+      <p class="privacy"><a href="/find.html" data-i18n="form.lost_link">Lost your report link?</a></p>
     </form>
   </main>
+  <script src="i18n.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

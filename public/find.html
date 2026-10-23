@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-i18n-title="find.page_title">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,25 +12,28 @@
       <span class="brand-mark" aria-hidden="true">
         <svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </span>
-      Idea Check
+      <span class="brand-name">Idea Check</span>
     </a>
-    <a class="header-link" href="/">Check an idea</a>
+    <div class="header-actions">
+      <a class="header-link" href="/" data-i18n="nav.check">Check an idea</a>
+    </div>
   </header>
 
   <main class="container">
     <form id="find-form" class="card form-card login-card" novalidate>
-      <h1>Lost your report link?</h1>
-      <p class="hint">Enter the email address you gave on the form. We will email you the links to all your reports.</p>
+      <h1 data-i18n="find.h1">Lost your report link?</h1>
+      <p class="hint" data-i18n="find.intro">Enter the email address you gave on the form. We will email you the links to all your reports.</p>
       <div class="field">
-        <label for="email">Your email</label>
+        <label for="email" data-i18n="find.email">Your email</label>
         <input id="email" name="email" type="email" inputmode="email" autocomplete="email" required placeholder="you@example.com">
         <p class="error" id="email-error"></p>
       </div>
-      <button type="submit" class="primary" id="find-submit">Email me my links</button>
+      <button type="submit" class="primary" id="find-submit" data-i18n="find.submit">Email me my links</button>
       <p class="form-status" id="find-status" role="status"></p>
-      <p class="hint">Didn't give an email on the form? Then we can't send the link. Contact the person who invited you to Idea Check and they can find your report for you.</p>
+      <p class="hint" data-i18n="find.no_email">Didn't give an email on the form? Then we can't send the link.</p>
     </form>
   </main>
+  <script src="i18n.js"></script>
   <script src="find.js"></script>
 </body>
 </html>

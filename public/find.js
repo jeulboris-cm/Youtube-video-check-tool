@@ -7,12 +7,12 @@ form.addEventListener("submit", async (event) => {
   event.preventDefault();
   button.disabled = true;
   emailError.textContent = "";
-  status.textContent = "Sending…";
+  status.textContent = I18N.t("find.sending");
   try {
     const response = await fetch("/api/find-reports", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: form.elements.email.value }),
+      body: JSON.stringify({ email: form.elements.email.value, language: I18N.lang }),
     });
     const body = await response.json();
     if (!response.ok) {
@@ -23,7 +23,7 @@ form.addEventListener("submit", async (event) => {
     }
     status.textContent = body.message;
   } catch {
-    status.textContent = "Could not send. Check your connection and try again.";
+    status.textContent = I18N.t("find.failed");
   } finally {
     button.disabled = false;
   }

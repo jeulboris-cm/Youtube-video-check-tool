@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-i18n-title="report.page_title">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,19 +13,31 @@
       <span class="brand-mark" aria-hidden="true">
         <svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </span>
-      Idea Check
+      <span class="brand-name">Idea Check</span>
     </a>
-    <a class="header-link" href="/">Check another idea</a>
+    <div class="header-actions">
+      <a class="header-link" href="/" data-i18n="nav.check_another">Check another idea</a>
+    </div>
   </header>
 
   <main class="container report">
-    <p id="loading" role="status">Loading your report…</p>
+    <p id="loading" role="status" data-i18n="report.loading">Loading your report…</p>
     <p class="error" id="load-error"></p>
-    <p id="lost-link" hidden><a href="/find.html">Lost your report link? Get it by email.</a></p>
+    <p id="lost-link" hidden><a href="/find.html" data-i18n="progress.lost_link">Lost your report link? Get it by email.</a></p>
+
+    <section id="progress" class="progress-card" hidden aria-live="polite">
+      <h1 data-i18n="progress.title">Building your report</h1>
+      <p class="hint" data-i18n="progress.intro">This usually takes under a minute. You can keep this page open; it updates by itself.</p>
+      <ol id="progress-steps" class="progress-steps"></ol>
+      <div id="progress-failed" hidden>
+        <p class="error" data-i18n="progress.failed">Something went wrong while building this report. Your idea is saved.</p>
+        <button type="button" class="primary" id="retry" data-i18n="progress.retry">Try again</button>
+      </div>
+    </section>
 
     <div id="report" hidden>
       <header class="idea-summary">
-        <p class="eyebrow">Idea Check report</p>
+        <p class="eyebrow" data-i18n="report.eyebrow">Idea Check report</p>
         <h1 id="idea-title"></h1>
         <p id="idea-text"></p>
         <p class="meta" id="idea-meta"></p>
@@ -35,141 +47,146 @@
       <p class="error" id="claude-error"></p>
 
       <section>
-        <h2><span class="num">1</span> Similar videos</h2>
-        <p class="hint">Found by searching YouTube for your idea and your working title, most relevant first. Shorts, clips under 3 minutes and videos less than 2 weeks old are left out.</p>
+        <h2><span class="num">1</span> <span data-i18n="s1.title">Similar videos</span></h2>
+        <p class="hint" data-i18n="s1.hint">Found by searching YouTube for your idea and your working title, most relevant first. Shorts, clips under 3 minutes and videos less than 2 weeks old are left out.</p>
         <ol id="similar" class="videos"></ol>
       </section>
 
       <section>
-        <h2><span class="num">2</span> Channels your size</h2>
+        <h2><span class="num">2</span> <span data-i18n="s2.title">Channels your size</span></h2>
+
+        <h3 data-i18n="s2.own_title">Your own recent videos</h3>
+        <div id="own-range" class="range" hidden></div>
+        <p id="own-note"></p>
+        <details id="own-details" hidden>
+          <summary id="own-summary"></summary>
+          <ol id="own-videos" class="videos"></ol>
+        </details>
+
+        <h3 data-i18n="s2.others_title">Similar videos from channels your size</h3>
         <p class="hint" id="size-band"></p>
         <div id="size-range" class="range" hidden></div>
         <p id="size-note"></p>
         <ol id="size-videos" class="videos"></ol>
         <div id="estimate" hidden>
-          <h3>Estimate from similar videos</h3>
+          <h3 data-i18n="s2.estimate_title">Estimate from similar videos</h3>
           <div id="estimate-range" class="range estimate"></div>
           <details>
-            <summary>Show the <span id="estimate-count"></span> videos this estimate uses</summary>
+            <summary id="estimate-summary"></summary>
             <ol id="estimate-videos" class="videos"></ol>
           </details>
         </div>
+        <p class="hint" data-i18n="range.twelve_months">Views are estimated for 12 months after publishing: older videos have had longer to collect views, so each video's views are adjusted for its age.</p>
       </section>
 
       <section>
-        <h2><span class="num">3</span> Who owns the subject</h2>
+        <h2><span class="num">3</span> <span data-i18n="s3.title">Who owns the subject</span></h2>
         <p id="ownership"></p>
         <p id="breakthrough-note"></p>
         <ol id="breakthroughs" class="videos"></ol>
       </section>
 
       <section>
-        <h2><span class="num">4</span> Shelf life</h2>
+        <h2><span class="num">4</span> <span data-i18n="s4.title">Shelf life</span></h2>
         <p id="shelf-life"></p>
         <ul id="shelf-signals" class="signals"></ul>
         <div id="reframes-block" hidden>
-          <h3>Same story, longer shelf life</h3>
+          <h3 data-i18n="s4.reframes">Same story, longer shelf life</h3>
           <ul id="reframes"></ul>
         </div>
         <p class="hint" id="shelf-source"></p>
       </section>
 
       <section>
-        <h2><span class="num">5</span> Cost versus range</h2>
+        <h2><span class="num">5</span> <span data-i18n="s5.title">Cost versus range</span></h2>
         <div id="cost"></div>
       </section>
 
       <section>
-        <h2><span class="num">6</span> Packaging suggestions</h2>
+        <h2><span class="num">6</span> <span data-i18n="s6.title">Packaging suggestions</span></h2>
         <div id="packaging-block" hidden>
           <ol id="packaging" class="packaging"></ol>
-          <h3>Check before publishing</h3>
+          <h3 data-i18n="s6.checks">Check before publishing</h3>
           <ul id="fact-checks"></ul>
-          <p class="hint">Written by Claude (AI) from your idea and the videos above. Treat it as a second opinion, not a fact.</p>
+          <p class="hint" data-i18n="s6.ai_note">Written by Claude (AI) from your idea and the videos above. Treat it as a second opinion, not a fact.</p>
         </div>
-        <p id="packaging-missing" hidden>
-          Packaging suggestions and fact-check flags need Claude (AI), which is not connected yet.
-          Until then, compare the titles in section 1 that got the most views from channels near your size.
-        </p>
+        <p id="packaging-missing" hidden data-i18n="s6.missing">Packaging suggestions and fact-check flags need Claude (AI), which is not connected yet.</p>
       </section>
 
       <section class="limits">
-        <h2>Known limits</h2>
-        <p>
-          These are ranges seen on similar videos, never a promise of views. Views also depend on how much
-          YouTube shows a video to people, which small channels do not control: in our own tests, videos with
-          similar click rates got anywhere from 281 to 53,600 impressions.
-        </p>
+        <h2 data-i18n="limits.title">Known limits</h2>
+        <p data-i18n="limits.text">These are ranges seen on similar videos, never a promise of views.</p>
       </section>
 
       <section id="feedback">
-        <h2><span class="num">7</span> Was this useful?</h2>
+        <h2><span class="num">7</span> <span data-i18n="s7.title">Was this useful?</span></h2>
         <form id="feedback-form" novalidate>
           <div class="field">
-            <span class="label" id="useful-label">Was this report useful?</span>
+            <span class="label" id="useful-label" data-i18n="s7.useful">Was this report useful?</span>
             <div class="segmented" role="radiogroup" aria-labelledby="useful-label">
-              <label><input type="radio" name="useful" value="yes"><span>Yes</span></label>
-              <label><input type="radio" name="useful" value="no"><span>No</span></label>
+              <label><input type="radio" name="useful" value="yes"><span data-i18n="common.yes">Yes</span></label>
+              <label><input type="radio" name="useful" value="no"><span data-i18n="common.no">No</span></label>
             </div>
             <p class="error" id="useful-error"></p>
           </div>
           <div class="field">
-            <span class="label" id="decision-label">Would it have changed your decision?</span>
+            <span class="label" id="decision-label" data-i18n="s7.decision">Would it have changed your decision?</span>
             <div class="segmented" role="radiogroup" aria-labelledby="decision-label">
-              <label><input type="radio" name="decision" value="changed"><span>Changed</span></label>
-              <label><input type="radio" name="decision" value="confirmed"><span>Confirmed</span></label>
-              <label><input type="radio" name="decision" value="no_effect"><span>No effect</span></label>
+              <label><input type="radio" name="decision" value="changed"><span data-i18n="s7.changed">Changed</span></label>
+              <label><input type="radio" name="decision" value="confirmed"><span data-i18n="s7.confirmed">Confirmed</span></label>
+              <label><input type="radio" name="decision" value="no_effect"><span data-i18n="s7.no_effect">No effect</span></label>
             </div>
             <p class="error" id="decision-error"></p>
           </div>
           <div class="field">
-            <label for="comment">Anything else? <span class="optional-tag">Optional</span></label>
-            <textarea id="comment" name="comment" rows="2" maxlength="2000" placeholder="What was missing, wrong or most helpful?"></textarea>
+            <label for="comment"><span data-i18n="s7.comment">Anything else?</span> <span class="optional-tag" data-i18n="common.optional">Optional</span></label>
+            <textarea id="comment" name="comment" rows="2" maxlength="2000" data-i18n-placeholder="s7.comment_ph" placeholder="What was missing, wrong or most helpful?"></textarea>
             <p class="error" id="comment-error"></p>
           </div>
-          <button type="submit" class="secondary" id="feedback-submit">Send feedback</button>
+          <button type="submit" class="secondary" id="feedback-submit" data-i18n="s7.send">Send feedback</button>
           <p class="form-status" id="feedback-status" role="status"></p>
         </form>
       </section>
 
       <section id="results">
-        <h2><span class="num">8</span> Your real results</h2>
+        <h2><span class="num">8</span> <span data-i18n="s8.title">Your real results</span></h2>
         <p id="results-intro"></p>
         <div id="results-summary" hidden></div>
         <form id="results-form" novalidate>
           <div class="field">
-            <label for="videoUrl">Link to the published video</label>
+            <label for="videoUrl" data-i18n="s8.video">Link to the published video</label>
             <input id="videoUrl" name="videoUrl" type="url" inputmode="url" placeholder="https://www.youtube.com/watch?v=…">
-            <p class="hint">Paste it as soon as the video is out. We then read its views from YouTube automatically.</p>
+            <p class="hint" data-i18n="s8.video_hint">Paste it as soon as the video is out. We then read its views from YouTube automatically.</p>
             <p class="error" id="videoUrl-error"></p>
           </div>
-          <span class="label">Views after…</span>
+          <span class="label" data-i18n="s8.views_after">Views after…</span>
           <div class="row three compact">
             <div class="field">
-              <label for="views7" class="sub-label">7 days</label>
+              <label for="views7" class="sub-label" data-i18n="s8.d7">7 days</label>
               <input id="views7" name="views7" type="number" inputmode="numeric" min="0" step="1">
               <p class="error" id="views7-error"></p>
             </div>
             <div class="field">
-              <label for="views30" class="sub-label">30 days</label>
+              <label for="views30" class="sub-label" data-i18n="s8.d30">30 days</label>
               <input id="views30" name="views30" type="number" inputmode="numeric" min="0" step="1">
               <p class="error" id="views30-error"></p>
             </div>
             <div class="field">
-              <label for="views90" class="sub-label">90 days</label>
+              <label for="views90" class="sub-label" data-i18n="s8.d90">90 days</label>
               <input id="views90" name="views90" type="number" inputmode="numeric" min="0" step="1">
               <p class="error" id="views90-error"></p>
             </div>
           </div>
-          <p class="hint">With the video's link, you can leave these empty: we read the views at 7, 30 and 90 days after publishing by ourselves. If you type numbers from YouTube Studio, yours are used instead.</p>
-          <label class="check-option"><input type="checkbox" name="notMade" id="notMade"> I decided not to make this video</label>
+          <p class="hint" data-i18n="s8.views_hint">With the video's link, you can leave these empty.</p>
+          <label class="check-option"><input type="checkbox" name="notMade" id="notMade"> <span data-i18n="s8.not_made">I decided not to make this video</span></label>
           <p class="error" id="notMade-error"></p>
-          <button type="submit" class="secondary" id="results-submit">Save results</button>
+          <button type="submit" class="secondary" id="results-submit" data-i18n="s8.save">Save results</button>
           <p class="form-status" id="results-status" role="status"></p>
         </form>
       </section>
     </div>
   </main>
+  <script src="i18n.js"></script>
   <script src="report.js"></script>
 </body>
 </html>

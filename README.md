@@ -162,3 +162,23 @@ that setting it is switched off. Five wrong passwords lock a visitor out for
 
 Testers who leave an email also get their report's link by email right
 after the check, so they never lose it.
+
+## Track record, 12-month ranges, progress and languages
+
+- **Your own recent videos:** the report reads the tester's 10 most recent
+  long videos (2 quota units) and shows the range they got. When there is
+  one, the cost section uses it, as it is the most direct evidence.
+- **12-month ranges:** every range is in estimated views 12 months after
+  publishing, so old videos do not look better just for being old
+  (`lib/compare.js`: views grow like days ^ 0.3, videos over 5 years old
+  are left out). Testers' 7, 30 and 90-day results are compared with the
+  range scaled to that day. The 0.3 is a working assumption to check against
+  the real results testers bring in.
+- **Progress:** the form answers at once and the report is built in the
+  background; the report page shows each step and offers "Try again" if a
+  build fails or stops.
+- **English and French:** an EN | FR switch on every page (French by default
+  for browsers set to French). Texts live in `public/i18n.js` (pages) and
+  `lib/i18n.js` (server messages and emails). The YouTube search uses the
+  idea's language, and when two searches return fewer than 30 videos (common
+  with long French sentences), a key-word search is added (100 units).
