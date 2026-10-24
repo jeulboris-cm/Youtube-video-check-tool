@@ -43,6 +43,16 @@
         <button type="button" class="secondary" id="download">Download spreadsheet (CSV)</button>
       </div>
 
+      <details class="card mail-test">
+        <summary>Check that emails work</summary>
+        <p class="hint">Sends one test email through Brevo. If Brevo refuses, its exact reason appears here.</p>
+        <div class="toolbar">
+          <input id="test-to" type="email" placeholder="Your email address" aria-label="Send the test email to">
+          <button type="button" class="secondary" id="test-send">Send test email</button>
+        </div>
+        <pre id="test-result" class="test-result" hidden></pre>
+      </details>
+
       <p class="meta" id="count"></p>
       <ol id="checks" class="checks"></ol>
     </div>

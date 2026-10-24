@@ -187,6 +187,15 @@ app.get("/api/admin/ideas", async (req, res) => {
   res.json(admin.overview(await ideas.readAll()));
 });
 
+// Owner page: sends one test email and reports what the mail server said.
+app.post("/api/admin/test-email", async (req, res) => {
+  const denied = admin.checkAccess(req);
+  if (denied) return res.status(denied[0]).json({ error: denied[1] });
+  const to = typeof req.body?.to === "string" ? req.body.to.trim() : "";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return res.status(400).json({ error: "Enter a valid email address." });
+  res.json(await reminders.sendTestEmail(to));
+});
+
 // The daily jobs: read the views of published videos at 7, 30 and 90 days,
 // and send the reminder emails that are due. A free scheduler (the GitHub
 // Actions workflow in .github/workflows/reminders.yml) calls this once a

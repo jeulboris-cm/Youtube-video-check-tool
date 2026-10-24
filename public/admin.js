@@ -183,6 +183,41 @@ $("login").addEventListener("submit", (event) => {
   event.preventDefault();
   openDashboard($("password").value);
 });
+// Explains the mail server's answer in plain words where we recognise it.
+function explainMailError(text) {
+  const t = String(text || "");
+  if (/535|authentication|auth/i.test(t)) return "Brevo did not accept the login: check SMTP_USER (the Login on Brevo's SMTP tab) and SMTP_PASS (an SMTP key starting with xsmtpsib-, not an API key).";
+  if (/sender|from/i.test(t)) return "Brevo did not accept the sender: EMAIL_FROM must be an address you have verified under Senders in Brevo.";
+  if (/not (yet )?activated|account|suspend|blocked/i.test(t)) return "Brevo has not activated the account for sending yet. Check your Brevo inbox or dashboard for a message about activation.";
+  if (/ECONNECTION|ETIMEDOUT|ENOTFOUND|connect/i.test(t)) return "Could not connect to Brevo: check SMTP_HOST (smtp-relay.brevo.com) and SMTP_PORT (587).";
+  return "";
+}
+
+$("test-send").addEventListener("click", async () => {
+  const box = $("test-result");
+  box.hidden = false;
+  box.textContent = "Sending…";
+  $("test-send").disabled = true;
+  try {
+    const response = await fetch("/api/admin/test-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${savedPassword()}` },
+      body: JSON.stringify({ to: $("test-to").value }),
+    });
+    const body = await response.json();
+    if (!response.ok) box.textContent = body.error || "Could not send.";
+    else if (body.ok) box.textContent = "Sent. Check that inbox, and its spam folder, in the next few minutes.";
+    else {
+      const hint = explainMailError(body.error);
+      box.textContent = `Not sent.\n\nBrevo's answer: ${body.error}${hint ? `\n\nWhat it means: ${hint}` : ""}\n\nSettings found: ${JSON.stringify(body.settings, null, 1)}`;
+    }
+  } catch {
+    box.textContent = "Could not reach the server.";
+  } finally {
+    $("test-send").disabled = false;
+  }
+});
+
 $("search").addEventListener("input", showChecks);
 $("download").addEventListener("click", downloadCsv);
 $("logout").addEventListener("click", () => {
