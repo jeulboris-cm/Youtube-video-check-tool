@@ -45,6 +45,7 @@ function showSummary(s) {
     tile(pct(s.decision.changed + s.decision.confirmed, s.feedback), "changed or confirmed a decision"),
     tile(s.withResults, "have real views"),
     tile(s.tracked, "videos followed automatically"),
+    tile(s.median30 == null ? "–" : `${s.median30}×`, "middle result at 30 days, as a multiple of the creator's usual"),
     tile(s.notMade, "decided not to make it"),
     tile(s.withEmail, "left an email"),
     tile(s.claude.reports ? money.format(s.claude.dollars) : "$0", s.claude.reports
@@ -107,8 +108,10 @@ function checkItem(r) {
   const views = [["7 days", r.views7, null], ["30 days", r.views30, r.compare30], ["90 days", r.views90, r.compare90]]
     .filter(([, v]) => v != null)
     .map(([label, v, c]) => `${label}: ${n(v)}${c ? ` (${c} range)` : ""}`);
+  const demand = r.demand ? `Demand: ${r.demand}. ` : "";
+  const multiples = [["30 days", r.multiple30], ["90 days", r.multiple90]].filter(([, x]) => x != null).map(([d, x]) => `${x}× usual at ${d}`);
   const status = r.notMade ? " Decided not to make this video." : r.autoTracked ? " Video followed automatically." : "";
-  item.append(el("p", (views.length ? `Real views: ${views.join(" · ")}.` : "No real views yet.") + status, views.length || status ? "" : "meta"));
+  item.append(el("p", demand + (views.length ? `Real views: ${views.join(" · ")}${multiples.length ? ` (${multiples.join(", ")})` : ""}.` : "No real views yet.") + status, views.length || status ? "" : "meta"));
 
   for (const problem of r.problems) item.append(el("p", problem, "error"));
   return item;
@@ -136,12 +139,12 @@ function downloadCsv() {
   const header = [
     "Date", "Working title", "Idea", "Channel", "Channel link", "Subscribers", "Email", "Cost (USD)", "Tied to news",
     "Shelf life", "Range basis", "Range low", "Range high", "Useful", "Decision", "Comment",
-    "Views 7 days", "Views 30 days", "Views 90 days", "30 days vs range", "90 days vs range", "Not made", "Followed automatically", "Video link", "Report link",
+    "Views 7 days", "Views 30 days", "Views 90 days", "30 days vs range", "90 days vs range", "Demand", "30 days x usual", "90 days x usual", "Not made", "Followed automatically", "Video link", "Report link",
   ];
   const rows = data.ideas.map((r) => [
     r.createdAt, r.workingTitle, r.idea, r.channelTitle, r.channelUrl, r.channelSubscribers, r.email, r.costUsd, r.newsTied,
     r.shelfLife, r.range?.basis, r.range?.low, r.range?.high, r.feedback?.useful, r.feedback?.decision, r.feedback?.comment,
-    r.views7, r.views30, r.views90, r.compare30, r.compare90, r.notMade ? "yes" : "", r.autoTracked ? "yes" : "", r.videoUrl, reportUrl(r.id),
+    r.views7, r.views30, r.views90, r.compare30, r.compare90, r.demand, r.multiple30, r.multiple90, r.notMade ? "yes" : "", r.autoTracked ? "yes" : "", r.videoUrl, reportUrl(r.id),
   ]);
   const csv = [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n");
   const link = el("a");

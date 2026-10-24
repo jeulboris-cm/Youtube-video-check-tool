@@ -182,3 +182,31 @@ after the check, so they never lose it.
   `lib/i18n.js` (server messages and emails). The YouTube search uses the
   idea's language, and when two searches return fewer than 30 videos (common
   with long French sentences), a key-word search is added (100 units).
+
+## Evidence from the niche (outliers, formats, related ideas, fit)
+
+Inspired by how professional channel strategists decide what to make:
+prove demand before filming, using videos that beat *their own channel's*
+usual results (`lib/compare.js`, `lib/niche.js`).
+
+- **Outliers and demand:** each similar video is compared with its
+  channel's average views per video (from the channel statistics already
+  fetched, so it costs no extra quota). 3× or more, with at least 1,000
+  views, counts as an outlier; under half is a miss. The report gives a
+  verdict (strong, some, weak) from hits and misses together. The average
+  includes Shorts and is an average, so this is a clue, not proof.
+- **Fit with the tester's channel:** a rough check of how many of their 10
+  recent titles share key words with the idea; Claude replaces it with its
+  own judgement when connected.
+- **Title formats:** 12 recognisable formats (English and French). A format
+  is shown only when 3 or more similar videos use it, with how many beat
+  their channel's average and how many fell below half. It never scores the
+  tester's own title.
+- **Related ideas with proven demand:** the other videos of the strongest
+  outlier channels (about 10 to 15 quota units, skipped when the daily
+  allowance is nearly used). With Claude connected, the same call as the
+  rest of the analysis names and explains them (only using numbered videos
+  it was given); without it they are listed as a plain list.
+- **"× your usual":** testers' real views are also shown as a multiple of
+  the middle of their own recent videos, scaled to the same number of days.
+  The owner page shows the middle multiple and the demand verdicts.

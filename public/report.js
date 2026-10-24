@@ -37,13 +37,23 @@ function fillList(list, entries, build) {
   );
 }
 
+// 9 -> "9×", 2.34 -> "2.3×", 140 -> "140×", in the page's number format.
+const num = (x) => new Intl.NumberFormat(I18N.locale, { maximumFractionDigits: x < 10 ? 1 : 0 }).format(x);
+const times = (x) => `${num(x)}×`;
+
 function renderVideos(list, videos) {
   fillList(list, videos, (video) => {
     const link = el("a", video.title);
     link.href = video.url;
     link.target = "_blank";
     link.rel = "noopener";
-    const meta = el("span", [views(video.views), formatAge(video.publishedAt), `${video.channelTitle} (${subscribers(video.channelSubscribers)})`].join(" · "), "meta");
+    const parts = [views(video.views), formatAge(video.publishedAt), `${video.channelTitle} (${subscribers(video.channelSubscribers)})`];
+    const meta = el("span", parts.join(" · "), "meta");
+    // How the video did against its own channel's average (reports built
+    // since outliers were added carry this).
+    if (video.outlierRatio != null) {
+      meta.append(" · ", el("span", t("video.times", { x: num(video.outlierRatio) }), video.outlier ? "ratio" : ""));
+    }
     return [link, meta];
   });
 }
@@ -71,6 +81,21 @@ function showIdea(idea, report) {
   const code = report.youtubeErrorCode;
   $("youtube-error").textContent = !report.youtubeError ? "" : code === "quota" || code === "no_key" ? t(`error.youtube.${code}`) : t("error.youtube.other");
   $("claude-error").textContent = report.claudeError || "";
+}
+
+// Is there demand? Videos that beat their own channel's average, hits and misses.
+function showDemand(report) {
+  const data = report.demand;
+  $("demand").hidden = !data;
+  if (!data) return;
+  const box = $("demand-box");
+  if (data.status === "thin") {
+    box.replaceChildren(el("p", t("demand.thin", { count: data.videoCount })));
+    return;
+  }
+  const head = el("p");
+  head.append(el("span", t(`demand.${data.verdict}`), `verdict ${data.verdict}`));
+  box.replaceChildren(head, el("p", t("demand.counts", { outliers: data.outliers, total: data.videoCount, under: data.under, median: num(data.median) }), "meta"));
 }
 
 function showSimilar(report) {
@@ -107,6 +132,20 @@ function showTrackRecord(report) {
     $("own-summary").textContent = t("s2.own_show", { count: record.videos.length });
     renderVideos($("own-videos"), record.videos);
     $("own-details").hidden = false;
+  }
+}
+
+// Does the idea fit the tester's own channel?
+function showFit(report) {
+  const fit = report.fit;
+  $("fit").hidden = !fit;
+  if (!fit) return;
+  if (fit.source === "claude") {
+    $("fit-text").replaceChildren(el("strong", t(`fit.claude_${fit.level}`)), ` ${fit.reason}`);
+    $("fit-note").textContent = t("fit.claude_note");
+  } else {
+    $("fit-text").textContent = t(`fit.${fit.level}`, { matches: fit.matches, total: fit.total });
+    $("fit-note").textContent = t("fit.keywords_note");
   }
 }
 
@@ -177,6 +216,40 @@ function showOwnership(data) {
   renderVideos($("breakthroughs"), data.breakthroughs);
 }
 
+// Related ideas with proven demand: Claude's named ideas when connected,
+// otherwise the plain list of videos.
+function showRelated(report) {
+  const data = report.related;
+  $("related").hidden = !data;
+  if (!data) return;
+  $("related-ideas").replaceChildren();
+  $("related-videos").replaceChildren();
+  if (data.videos.length === 0) {
+    $("related-note").textContent = t("related.none");
+    return;
+  }
+  if (data.ideas && data.ideas.length) {
+    $("related-note").textContent = t("related.ai_note");
+    fillList($("related-ideas"), data.ideas, (idea) => {
+      const list = el("ol", undefined, "videos");
+      renderVideos(list, idea.videoNumbers.map((n) => data.videos[n - 1]).filter(Boolean));
+      return [
+        el("strong", idea.name),
+        el("br"),
+        el("strong", t("related.why")),
+        idea.whyDemand,
+        el("br"),
+        el("strong", t("related.angle")),
+        idea.angle,
+        list,
+      ];
+    });
+  } else {
+    $("related-note").textContent = t("related.plain");
+    renderVideos($("related-videos"), data.videos);
+  }
+}
+
 function showShelfLife(data, analysis) {
   // The free check gives codes the page can translate; Claude writes text.
   // "1 signal points" / "1 signal indique": singular when exactly one.
@@ -221,6 +294,30 @@ function showCost(idea, report) {
     table.append(tr);
   });
   box.replaceChildren(el("p", t("s5.your_cost", { cost: money(idea.costUsd) })), table, el("p", t(`s5.basis.${basis}`), "hint"));
+}
+
+// Title formats seen among the similar videos, with hits and misses.
+function showFormats(report) {
+  const data = report.formats;
+  $("formats-block").hidden = !data;
+  if (!data) return;
+  $("formats-intro").textContent = t("formats.intro");
+  $("formats-none").textContent = data.status === "thin" ? t("formats.thin") : data.formats.length ? "" : t("formats.none");
+  fillList($("formats"), data.status === "thin" ? [] : data.formats, (f) => {
+    const link = el("a", `“${f.example.title}”`);
+    link.href = f.example.url;
+    link.target = "_blank";
+    link.rel = "noopener";
+    return [
+      el("strong", t(`fmt.${f.id}`)),
+      el("br"),
+      t("formats.row", { count: f.count, outliers: f.outliers, under: f.under }),
+      el("br"),
+      el("span", t("formats.best"), "meta"),
+      link,
+      el("span", ` (${t("video.times", { x: num(f.example.outlierRatio) })})`, "meta"),
+    ];
+  });
 }
 
 function showPackaging(analysis) {
@@ -301,6 +398,16 @@ function rangeAt(report, range, days) {
 
 const CHECKPOINT_DAYS = [7, 30, 90];
 
+// Real views as a multiple of the tester's usual: the middle of their own
+// recent videos' estimated 12-month views, scaled to that day (same curve as
+// the server's). Null when the report has no track record.
+function usualMultiple(report, viewCount, days) {
+  const middle = report.trackRecord?.range?.middle;
+  if (!middle || report.model?.unit !== "views_12_months") return null;
+  const usual = middle * (days / 365) ** report.model.growth;
+  return usual > 0 ? Math.round((viewCount / usual) * 10) / 10 : null;
+}
+
 // The tester's own number for a checkpoint, or else the automatic reading.
 function viewsAt(results, day) {
   const typed = results[`views${day}`];
@@ -358,6 +465,7 @@ function showResults(idea, report) {
     for (const [day, v] of known) {
       const target = rangeAt(report, range, day);
       const verdict = v.views < target.low ? "below" : v.views > target.high ? "above" : "inside";
+      const multiple = usualMultiple(report, v.views, day);
       list.append(
         el("li", t("s8.compare_line", {
           day,
@@ -367,11 +475,13 @@ function showResults(idea, report) {
           low: n(target.low),
           high: n(target.high),
           basis: t(`s8.basis.${range.basis}`),
+          usual: multiple === null ? "" : ` ${t("s8.usual", { x: num(multiple) })}`,
         })),
       );
     }
     const note = report.model?.unit === "views_12_months" ? "s8.compare_note" : "s8.compare_note_old";
     lines.push(el("p", t("s8.compare_title")), list, el("p", t(note), "hint"));
+    if (report.trackRecord?.range) lines.push(el("p", t("s8.usual_note"), "hint"));
   } else if (known.length) {
     lines.push(el("p", t("s8.no_range"), "hint"));
   }
@@ -387,12 +497,16 @@ function render(idea) {
   current = idea;
   const report = idea.report;
   showIdea(idea, report);
+  showDemand(report);
   showSimilar(report);
   showTrackRecord(report);
+  showFit(report);
   showYourSize(report.yourSize);
   showOwnership(report.ownership);
+  showRelated(report);
   showShelfLife(report.shelfLife, report.analysis);
   showCost(idea, report);
+  showFormats(report);
   showPackaging(report.analysis);
   showFeedback(idea);
   showResults(idea, report);
@@ -420,7 +534,7 @@ function setUpForms(id) {
 
 // ---------- Waiting for a report that is still being built ----------
 
-const STEPS = ["start", "channel", "search", "search_deeper", "compare", "analysis"];
+const STEPS = ["start", "channel", "search", "search_deeper", "compare", "related", "analysis"];
 
 function showProgress(idea) {
   const step = idea.build?.step || "start";

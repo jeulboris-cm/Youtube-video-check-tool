@@ -48,6 +48,11 @@
 
       <section>
         <h2><span class="num">1</span> <span data-i18n="s1.title">Similar videos</span></h2>
+        <div id="demand" hidden>
+          <h3 data-i18n="demand.title">Is there demand?</h3>
+          <div id="demand-box" class="range"></div>
+          <p class="hint" data-i18n="demand.note"></p>
+        </div>
         <p class="hint" data-i18n="s1.hint">Found by searching YouTube for your idea and your working title, most relevant first. Shorts, clips under 3 minutes and videos less than 2 weeks old are left out.</p>
         <ol id="similar" class="videos"></ol>
       </section>
@@ -62,6 +67,12 @@
           <summary id="own-summary"></summary>
           <ol id="own-videos" class="videos"></ol>
         </details>
+
+        <div id="fit" hidden>
+          <h3 data-i18n="fit.title">Does it fit your channel?</h3>
+          <p id="fit-text"></p>
+          <p class="hint" id="fit-note"></p>
+        </div>
 
         <h3 data-i18n="s2.others_title">Similar videos from channels your size</h3>
         <p class="hint" id="size-band"></p>
@@ -84,6 +95,14 @@
         <p id="ownership"></p>
         <p id="breakthrough-note"></p>
         <ol id="breakthroughs" class="videos"></ol>
+
+        <div id="related" hidden>
+          <h3 data-i18n="related.title">Related ideas with proven demand</h3>
+          <p class="hint" data-i18n="related.intro"></p>
+          <p class="hint" id="related-note"></p>
+          <ol id="related-ideas" class="ideas"></ol>
+          <ol id="related-videos" class="videos"></ol>
+        </div>
       </section>
 
       <section>
@@ -104,6 +123,14 @@
 
       <section>
         <h2><span class="num">6</span> <span data-i18n="s6.title">Packaging suggestions</span></h2>
+        <div id="formats-block" hidden>
+          <h3 data-i18n="formats.title">Title formats in this niche</h3>
+          <p class="hint" id="formats-intro"></p>
+          <ul id="formats" class="formats"></ul>
+          <p id="formats-none"></p>
+          <p class="hint" data-i18n="formats.caution"></p>
+        </div>
+
         <div id="packaging-block" hidden>
           <ol id="packaging" class="packaging"></ol>
           <h3 data-i18n="s6.checks">Check before publishing</h3>

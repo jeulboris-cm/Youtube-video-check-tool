@@ -969,3 +969,52 @@ summary {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+/* ---------- Demand, formats, related ideas ---------- */
+
+.verdict {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.verdict.moderate {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+}
+
+.verdict.weak {
+  background: transparent;
+  color: var(--muted);
+  border: 1px dashed var(--border-strong);
+}
+
+.ratio {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.formats,
+.ideas {
+  margin: 8px 0 0;
+  padding-left: 1.3em;
+}
+
+.formats li,
+.ideas > li {
+  margin-bottom: 14px;
+}
+
+.ideas > li > strong {
+  font-size: 1.02rem;
+}
+
+.ideas .videos {
+  margin-top: 6px;
+}
