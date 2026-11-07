@@ -5,6 +5,8 @@ const youtube = require("./lib/youtube");
 const reminders = require("./lib/reminders");
 const admin = require("./lib/admin");
 const tracking = require("./lib/tracking");
+const watch = require("./lib/watch");
+const ranking = require("./lib/ranking");
 const { createLimiter } = require("./lib/ratelimit");
 const { buildReport } = require("./lib/report");
 const i18n = require("./lib/i18n");
@@ -80,9 +82,10 @@ app.post("/api/ideas/:id/retry", async (req, res) => {
 // What the report page gets: everything except the email address, plus
 // when the reminder is due.
 function publicView(record) {
-  const { email, ...rest } = record;
+  const { email, watch: watchState, ...rest } = record;
   return {
     ...rest,
+    watch: watch.publicState(record),
     reminder: {
       hasEmail: Boolean(email),
       emailOn: reminders.isConfigured(),
@@ -100,6 +103,48 @@ app.get("/api/ideas/:id", async (req, res) => {
   const record = await ideas.find(req.params.id);
   if (!record) return res.status(404).json({ error: i18n.t(i18n.fromRequest(req), "msg.not_found") });
   res.json(publicView(record));
+});
+
+// Compare my ideas: the browser sends the ids of the reports it has seen (it
+// remembers them itself); unknown ids are ignored. Uses saved reports only.
+app.post("/api/compare", async (req, res) => {
+  const lang = i18n.fromRequest(req);
+  const ids = Array.isArray(req.body?.ids) ? [...new Set(req.body.ids.filter((x) => typeof x === "string" && x.length < 64))].slice(0, 12) : [];
+  const found = (await ideas.findMany(ids)).filter((i) => i.report);
+  if (found.length < 2) return res.status(400).json({ error: i18n.t(lang, "msg.compare_few") });
+  res.json(ranking.rank(found));
+});
+
+// Watch this idea: start, and stop from the report page (the report link is
+// the secret). Only the form's own email address is ever written to.
+app.post("/api/ideas/:id/watch", async (req, res) => {
+  const lang = i18n.fromRequest(req);
+  const result = await watch.start(req.params.id);
+  const reasons = { not_found: [404, "msg.not_found"], no_email: [400, "msg.watch_no_email"], not_ready: [400, "msg.watch_not_ready"], full: [409, "msg.watch_full"], too_many: [409, "msg.watch_too_many"] };
+  if (!result.ok) return res.status(reasons[result.reason][0]).json({ error: i18n.t(lang, reasons[result.reason][1]) });
+  res.json(publicView(result.idea));
+});
+
+app.post("/api/ideas/:id/watch/stop", async (req, res) => {
+  const record = await ideas.find(req.params.id);
+  if (!record) return res.status(404).json({ error: i18n.t(i18n.fromRequest(req), "msg.not_found") });
+  await watch.stop(record.id);
+  res.json(publicView(await ideas.find(record.id)));
+});
+
+// The page behind the "stop watching" link in an email. Asking is read-only;
+// stopping needs a POST, so mail scanners that open links change nothing.
+app.get("/api/watch/:id", async (req, res) => {
+  const record = await ideas.find(req.params.id);
+  if (!record || !watch.tokenMatches(record, req.query.t)) return res.status(404).json({ error: i18n.t(i18n.fromRequest(req), "msg.not_found") });
+  res.json({ title: record.workingTitle, on: watch.isActive(record) });
+});
+
+app.post("/api/watch/:id/stop", async (req, res) => {
+  const record = await ideas.find(req.params.id);
+  if (!record || !watch.tokenMatches(record, req.body?.t)) return res.status(404).json({ error: i18n.t(i18n.fromRequest(req), "msg.not_found") });
+  await watch.stop(record.id, record.watch.token);
+  res.json({ title: record.workingTitle, on: false });
 });
 
 // Saves the real results: the published video's link and the views at 7,
@@ -212,7 +257,14 @@ app.post("/api/cron/reminders", async (req, res) => {
     console.error(error);
     views = { read: 0, error: error.message };
   }
-  res.json({ views, reminders: await reminders.sendDueReminders() });
+  let watching;
+  try {
+    watching = await watch.runDue();
+  } catch (error) {
+    console.error(error);
+    watching = { checked: 0, error: error.message };
+  }
+  res.json({ views, watching, reminders: await reminders.sendDueReminders() });
 });
 
 // Any error not handled above: log it and answer with a plain message.

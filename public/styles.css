@@ -1068,3 +1068,9 @@ summary {
   display: block;
   font-weight: 600;
 }
+
+/* Compare my ideas */
+.compare { list-style: none; padding: 0; display: grid; gap: 12px; margin: 16px 0; }
+.compare-item h2 { font-size: 1.1rem; margin: 0 0 8px; }
+.compare-item p { margin: 6px 0; }
+button.small { padding: 4px 10px; font-size: 0.85rem; }

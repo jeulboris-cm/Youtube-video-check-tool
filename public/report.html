@@ -17,6 +17,7 @@
       <span class="brand-name">Idea Check</span>
     </a>
     <div class="header-actions">
+      <a class="header-link" href="/compare.html" data-i18n="compare.link">Compare my ideas</a>
       <a class="header-link" href="/" data-i18n="nav.check_another">Check another idea</a>
     </div>
   </header>
@@ -163,6 +164,14 @@
         <p id="packaging-missing" hidden data-i18n="s6.missing">Packaging suggestions and fact-check flags need Claude (AI), which is not connected yet.</p>
       </section>
 
+      <section id="watch-block" hidden>
+        <h2 data-i18n="watch.title">Watch this idea</h2>
+        <p id="watch-text"></p>
+        <button type="button" class="secondary" id="watch-toggle"></button>
+        <p class="hint" data-i18n="watch.hint"></p>
+        <p class="error" id="watch-error"></p>
+      </section>
+
       <section class="limits">
         <h2 data-i18n="limits.title">Known limits</h2>
         <p data-i18n="limits.text">These are ranges seen on similar videos, never a promise of views.</p>
@@ -237,6 +246,7 @@
     </div>
   </main>
   <script src="i18n.js"></script>
+  <script src="mine.js"></script>
   <script src="report.js"></script>
 </body>
 </html>

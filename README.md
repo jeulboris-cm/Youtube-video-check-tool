@@ -227,3 +227,9 @@ usual results (`lib/compare.js`, `lib/niche.js`).
   contrast, shown with YouTube's own thumbnail images (loaded lazily, with no
   referrer, so a report's private link is never sent to YouTube). The tool
   shows them without judging them.
+
+## Compare my ideas and Watch this idea
+
+**Compare my ideas** (`/compare.html`) puts the ideas a tester checked side by side. The browser remembers the report ids it has opened (localStorage, `public/mine.js`; nothing is stored on a server), and a pasted report link adds an older one. `POST /api/compare` reads the saved reports only, so it costs no YouTube or Claude quota. The order is plain (`lib/ranking.js`): lowest cost per 1,000 views at the middle of the range when every idea has a cost, otherwise the highest middle of the range. Demand, crowding and shelf life are shown beside each idea but do not change the order.
+
+**Watch this idea** (a card at the bottom of the report): once a week for 90 days, `lib/watch.js` runs one date-filtered YouTube search (`youtube.newSimilarVideos`, about 102 units) and emails the tester only if new videos on the subject appeared. It uses only the email given in the form, never an address typed later. Each email links to `/unsubscribe.html`, which asks for confirmation before stopping (a mail scanner opening the link changes nothing). Limits: 40 watches at once, 3 per email address, 8 checks per daily run, and no checks once the day's YouTube use is above 5,000 units. The daily GitHub Actions call (`/api/cron/reminders`) runs the checks. The owner page shows how many ideas are watched, and the CSV has a "Watched" column.

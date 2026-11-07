@@ -548,6 +548,23 @@ function showResults(idea, report) {
 
 let current = null;
 
+function showWatch(idea) {
+  const w = idea.watch;
+  const block = $("watch-block");
+  block.hidden = false;
+  $("watch-error").textContent = "";
+  const button = $("watch-toggle");
+  if (w.on) {
+    $("watch-text").textContent = t("watch.on", { date: date(w.expiresAt), last: w.lastCheckedAt ? date(w.lastCheckedAt) : t("watch.never") });
+    button.textContent = t("watch.stop");
+    button.hidden = false;
+  } else {
+    $("watch-text").textContent = !idea.reminder.hasEmail ? t("watch.no_email") : !idea.reminder.emailOn ? t("watch.off_email") : t("watch.intro");
+    button.textContent = t("watch.start");
+    button.hidden = !w.available;
+  }
+}
+
 function render(idea) {
   current = idea;
   const report = idea.report;
@@ -567,9 +584,26 @@ function render(idea) {
   showPackaging(report.analysis);
   showFeedback(idea);
   showResults(idea, report);
+  showWatch(idea);
 }
 
 function setUpForms(id) {
+  $("watch-toggle").addEventListener("click", async () => {
+    $("watch-toggle").disabled = true;
+    try {
+      const response = await fetch(`/api/ideas/${id}/watch${current.watch.on ? "/stop" : ""}?lang=${I18N.lang}`, { method: "POST" });
+      const body = await response.json();
+      if (!response.ok) $("watch-error").textContent = body.error || t("watch.error");
+      else {
+        current = body;
+        showWatch(body);
+      }
+    } catch {
+      $("watch-error").textContent = t("watch.error");
+    } finally {
+      $("watch-toggle").disabled = false;
+    }
+  });
   $("feedback-form").addEventListener("submit", async (event) => {
     event.preventDefault();
     const updated = await postForm(event.target, `/api/ideas/${id}/feedback`, ["useful", "decision", "comment"], $("feedback-status"), $("feedback-submit"));
@@ -627,6 +661,7 @@ async function load() {
       idea = await fetchIdea(id);
     }
     $("progress").hidden = true;
+    Mine.add(id);
     render(idea);
     setUpForms(id);
     $("report").hidden = false;

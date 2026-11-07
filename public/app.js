@@ -39,6 +39,7 @@ form.addEventListener("submit", async (event) => {
       return;
     }
     // The report page shows progress while the report is built.
+    Mine.add(body.id);
     window.location.href = `/report.html?id=${encodeURIComponent(body.id)}`;
   } catch {
     formStatus.textContent = I18N.t("common.no_connection");
@@ -47,3 +48,6 @@ form.addEventListener("submit", async (event) => {
     submitButton.classList.remove("loading");
   }
 });
+
+// Offer the comparison once this browser has two checked ideas.
+if (window.Mine && Mine.ids().length >= 2) document.getElementById("compare-link").hidden = false;
