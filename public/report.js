@@ -38,7 +38,8 @@ function fillList(list, entries, build) {
 }
 
 // 9 -> "9×", 2.34 -> "2.3×", 140 -> "140×", in the page's number format.
-const num = (x) => new Intl.NumberFormat(I18N.locale, { maximumFractionDigits: x < 10 ? 1 : 0 }).format(x);
+// A tiny but non-zero multiple reads "<0.1", never a misleading "0".
+const num = (x) => (x > 0 && x < 0.1 ? "<0.1" : new Intl.NumberFormat(I18N.locale, { maximumFractionDigits: x < 10 ? 1 : 0 }).format(x));
 const times = (x) => `${num(x)}×`;
 
 function renderVideos(list, videos) {
@@ -214,6 +215,60 @@ function showOwnership(data) {
     ? t("s3.breakthroughs", { count: data.breakthroughs.length, small: n(data.thresholds.small), views: n(data.thresholds.breakthroughViews) })
     : t("s3.no_breakthrough", { small: n(data.thresholds.small) });
   renderVideos($("breakthroughs"), data.breakthroughs);
+}
+
+// Is the subject getting crowded? More videos lately, and doing worse?
+function showSaturation(report) {
+  const data = report.saturation;
+  $("saturation").hidden = !data;
+  if (!data) return;
+  const box = $("sat-box");
+  $("sat-detail").textContent = "";
+  $("sat-newest-block").hidden = true;
+  if (data.status === "thin") {
+    box.replaceChildren(el("p", t("sat.thin", { count: data.videoCount })));
+    return;
+  }
+  const head = el("p");
+  // Crowded is the warning (filled badge); busier is outlined; the rest dashed.
+  const style = { crowded: "", growing: "moderate", fading: "weak", steady: "weak" }[data.verdict];
+  head.append(el("span", t(`sat.${data.verdict}`), `verdict ${style}`));
+  box.replaceChildren(head, el("p", t(`sat.explain.${data.verdict}`), "meta"));
+  const lines = [t("sat.detail_rate", { recent: data.recentCount, earlier: num(data.earlierPerPeriod) })];
+  if (data.recentMedian != null && data.earlierMedian != null) lines.push(t("sat.detail_perf", { recent: num(data.recentMedian), earlier: num(data.earlierMedian) }));
+  if (data.recentOutliers > 0) lines.push(t("sat.detail_outliers", { count: data.recentOutliers }));
+  $("sat-detail").textContent = lines.join(" ");
+  if (data.newest.length) {
+    renderVideos($("sat-newest"), data.newest);
+    $("sat-newest-block").hidden = false;
+  }
+}
+
+// Thumbnails of the strongest outliers, and a few misses for contrast.
+function thumbItem(item) {
+  const link = el("a");
+  link.href = item.url;
+  link.target = "_blank";
+  link.rel = "noopener";
+  const img = el("img");
+  img.src = item.thumb;
+  img.alt = item.title;
+  img.loading = "lazy";
+  img.referrerPolicy = "no-referrer";
+  const caption = el("span", undefined, "caption");
+  caption.append(el("strong", `${times(item.outlierRatio)} · ${item.channelTitle}`), item.title);
+  link.append(img, caption);
+  return [link];
+}
+
+function showThumbnails(report) {
+  const data = report.thumbnails;
+  const show = Boolean(data && data.winners.length);
+  $("thumbs-block").hidden = !show;
+  if (!show) return;
+  fillList($("thumbs-winners"), data.winners, thumbItem);
+  $("thumbs-misses-block").hidden = data.misses.length === 0;
+  fillList($("thumbs-misses"), data.misses, thumbItem);
 }
 
 // Related ideas with proven demand: Claude's named ideas when connected,
@@ -503,10 +558,12 @@ function render(idea) {
   showFit(report);
   showYourSize(report.yourSize);
   showOwnership(report.ownership);
+  showSaturation(report);
   showRelated(report);
   showShelfLife(report.shelfLife, report.analysis);
   showCost(idea, report);
   showFormats(report);
+  showThumbnails(report);
   showPackaging(report.analysis);
   showFeedback(idea);
   showResults(idea, report);

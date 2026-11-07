@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
   <title>Idea Check report</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -96,6 +97,17 @@
         <p id="breakthrough-note"></p>
         <ol id="breakthroughs" class="videos"></ol>
 
+        <div id="saturation" hidden>
+          <h3 data-i18n="sat.title">Is the subject getting crowded?</h3>
+          <div id="sat-box" class="range"></div>
+          <p class="hint" id="sat-detail"></p>
+          <div id="sat-newest-block" hidden>
+            <p class="hint" data-i18n="sat.newest"></p>
+            <ol id="sat-newest" class="videos"></ol>
+          </div>
+          <p class="hint" data-i18n="sat.note"></p>
+        </div>
+
         <div id="related" hidden>
           <h3 data-i18n="related.title">Related ideas with proven demand</h3>
           <p class="hint" data-i18n="related.intro"></p>
@@ -129,6 +141,17 @@
           <ul id="formats" class="formats"></ul>
           <p id="formats-none"></p>
           <p class="hint" data-i18n="formats.caution"></p>
+        </div>
+
+        <div id="thumbs-block" hidden>
+          <h3 data-i18n="thumbs.title">Thumbnails of the winners</h3>
+          <p class="hint" data-i18n="thumbs.intro"></p>
+          <ul id="thumbs-winners" class="thumbs"></ul>
+          <div id="thumbs-misses-block" hidden>
+            <h3 data-i18n="thumbs.misses_title">For contrast: videos that fell short</h3>
+            <ul id="thumbs-misses" class="thumbs"></ul>
+          </div>
+          <p class="hint" data-i18n="thumbs.note"></p>
         </div>
 
         <div id="packaging-block" hidden>

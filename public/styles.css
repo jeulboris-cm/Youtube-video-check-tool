@@ -1018,3 +1018,53 @@ summary {
 .ideas .videos {
   margin-top: 6px;
 }
+
+/* ---------- Thumbnails of the winners ---------- */
+
+.thumbs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .thumbs {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.thumbs a {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.thumbs img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.thumbs a:hover img {
+  border-color: var(--accent);
+}
+
+.thumbs .caption {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.thumbs .caption strong {
+  display: block;
+  font-weight: 600;
+}

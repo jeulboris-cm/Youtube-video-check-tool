@@ -210,3 +210,20 @@ usual results (`lib/compare.js`, `lib/niche.js`).
 - **"× your usual":** testers' real views are also shown as a multiple of
   the middle of their own recent videos, scaled to the same number of days.
   The owner page shows the middle multiple and the demand verdicts.
+
+## Saturation and thumbnails of the winners
+
+- **Is the subject getting crowded?** (`saturationCheck` in `lib/compare.js`,
+  free, no quota.) From the similar videos' publish dates: are more videos on
+  the subject coming out in the last 90 days than in the 9 months before, and
+  do the newer ones do worse once adjusted for age (estimated 12-month views
+  against their channel's average)? Verdicts: crowded (more and weaker),
+  getting busier (more, as good), cooling off (weaker) and steady. It also
+  lists the 5 newest videos. A clue only: search returns the most relevant
+  videos, not all, and videos under 2 weeks old are excluded. Claude also
+  sees the verdict, to mention it in its advice.
+- **Thumbnails of the winners** (`thumbnailGallery` in `lib/niche.js`, free):
+  the 6 strongest outliers (at most 2 per channel) plus 3 real misses for
+  contrast, shown with YouTube's own thumbnail images (loaded lazily, with no
+  referrer, so a report's private link is never sent to YouTube). The tool
+  shows them without judging them.
