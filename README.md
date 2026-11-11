@@ -4,6 +4,12 @@ A web tool that tells a YouTuber, before production starts, whether a video
 idea is worth the time and money, using real data from similar videos on
 channels of the same size.
 
+## Also in this repository
+
+[Topic Radar](topic-radar/README.md) is a separate weekly research agent that
+finds documentary topics with real audience demand and keeps an idea bank.
+It shares no code with Idea Check.
+
 ## Status
 
 Steps 1 to 7 of the build plan are done: a small Node.js server, an input

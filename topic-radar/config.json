@@ -1,0 +1,33 @@
+{
+  "channelDescription": "Faceless long-form documentaries (20-40 minutes) on geopolitics, business scandals, espionage and current affairs, for a general English-speaking audience.",
+  "channelUrl": "",
+  "language": "en",
+  "ideasPerWeek": 10,
+  "beats": [
+    {
+      "name": "Geopolitics",
+      "news": ["geopolitics", "sanctions", "border conflict", "power struggle government"],
+      "youtube": ["geopolitics documentary", "why country explained"]
+    },
+    {
+      "name": "Business scandals",
+      "news": ["corporate fraud", "accounting scandal", "CEO arrested", "company collapse investigation"],
+      "youtube": ["business scandal documentary", "corporate fraud story"]
+    },
+    {
+      "name": "Espionage and intelligence",
+      "news": ["espionage", "spy arrested", "intelligence agency", "sabotage investigation"],
+      "youtube": ["spy documentary", "espionage story"]
+    },
+    {
+      "name": "Crime, corruption and power",
+      "news": ["corruption investigation", "money laundering", "cartel", "oligarch"],
+      "youtube": ["corruption documentary", "money laundering explained"]
+    },
+    {
+      "name": "Global economy and resources",
+      "news": ["trade war", "oil supply", "rare earths", "shipping disruption"],
+      "youtube": ["economy documentary", "how country got rich"]
+    }
+  ]
+}

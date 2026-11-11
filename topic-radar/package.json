@@ -1,0 +1,18 @@
+{
+  "name": "topic-radar",
+  "version": "0.1.0",
+  "description": "Topic Radar: a weekly AI agent that finds documentary topics your audience wants (geopolitics, business scandals, espionage) and keeps an idea bank.",
+  "private": true,
+  "main": "src/run.js",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/run.js",
+    "dry-run": "node --env-file-if-exists=.env src/run.js --no-email"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.1.0",
+    "nodemailer": "^10.2.1"
+  }
+}

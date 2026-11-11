@@ -1,0 +1,79 @@
+# Topic Radar: the weekly research agent in topic-radar/ (separate from Idea
+# Check). Every Monday it finds documentary ideas, updates the idea bank,
+# saves the recap in topic-radar/recaps/, and opens a GitHub issue with it
+# (GitHub emails you about new issues). It can also email the recap itself.
+#
+# Repository secrets (Settings > Secrets and variables > Actions):
+#   ANTHROPIC_API_KEY   required
+#   YOUTUBE_API_KEY     strongly recommended (demand and competition data)
+#   SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, EMAIL_FROM, RADAR_EMAIL_TO
+#                       optional, to also email the recap
+# GitHub only runs scheduled workflows from the default branch, so this file
+# must be on that branch. "Run workflow" on the Actions tab runs it now.
+name: Topic Radar (weekly)
+
+on:
+  schedule:
+    - cron: "23 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: topic-radar
+  cancel-in-progress: false
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: topic-radar
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: topic-radar/package-lock.json
+
+      - run: npm ci
+
+      - name: Run the agent
+        id: run
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          CLAUDE_MODEL: ${{ vars.CLAUDE_MODEL }}
+          CLAUDE_EFFORT: ${{ vars.CLAUDE_EFFORT }}
+          RADAR_YOUTUBE_UNITS: ${{ vars.RADAR_YOUTUBE_UNITS }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          RADAR_EMAIL_TO: ${{ secrets.RADAR_EMAIL_TO }}
+        run: |
+          export RECAP_LINK="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/topic-radar/recaps/$(date -u +%F).md"
+          file=$(node src/run.js)
+          echo "file=$file" >> "$GITHUB_OUTPUT"
+
+      - name: Save the recap and the idea bank
+        run: |
+          git config user.name "topic-radar[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add recaps idea-bank.json IDEA-BANK.md
+          git commit -m "Topic Radar recap for $(date -u +%F)" || exit 0
+          git push
+
+      - name: Open an issue with the recap
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FILE: ${{ steps.run.outputs.file }}
+        run: |
+          head -c 60000 "$FILE" > /tmp/recap.md
+          gh issue create --title "Topic Radar: week of $(date -u +%F)" --body-file /tmp/recap.md
